@@ -1,0 +1,101 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 카카오 채널 연동 규칙
+
+## SOLAPI 카카오 연동 가이드
+이 프로젝트는 [package.json](mdc:package.json)에 정의된 Next.js 기반으로 카카오 비즈니스 채널을 연동합니다.
+
+## 보안 규칙
+- API 키와 시크릿은 절대 코드에 직접 입력 금지
+- 환경변수 사용 필수: `SOLAPI_API_KEY`, `SOLAPI_API_SECRET`
+- 토큰은 임시 저장소에만 보관, 데이터베이스 저장 금지
+
+## 파일 구조
+lib/
+├── kakao/
+│ ├── channel-manager.ts // 채널 관리 클래스
+│ ├── message-service.ts // 메시지 발송 서비스
+│ └── types.ts // 카카오 관련 타입 정의
+
+
+## 필수 구현 사항
+1. **채널 연동 관리자 클래스**
+   - 카테고리 조회
+   - 토큰 요청
+   - 채널 연동
+   - 에러 처리
+
+2. **메시지 서비스**
+   - 알림톡 발송
+   - 친구톡 발송
+   - 발송 상태 확인
+
+3. **타입 안전성**
+   - 모든 카카오 API 응답에 대한 타입 정의
+   - 요청 데이터 유효성 검사
+
+## 에러 처리 패턴
+```typescript
+// 카카오 API 에러 처리 표준
+export class KakaoApiError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public originalError?: unknown
+  ) {
+    super(`[카카오 API 오류] ${message}`);
+    this.name = 'KakaoApiError';
+  }
+}
+```
+
+## 환경변수 설정
+```env
+# .env.local
+SOLAPI_API_KEY=your_api_key_here
+SOLAPI_API_SECRET=your_api_secret_here
+NEXT_PUBLIC_KAKAO_CHANNEL_ID=@your_channel_id
+```
+```
+
+### `.cursor/rules/ticketing-system.mdc`
+```markdown
+# 티켓팅 시스템 개발 규칙
+
+## 프로젝트 개요
+[package.json](mdc:package.json)에 정의된 Next.js 기반 티켓팅 시스템으로, Radix UI와 Tailwind CSS를 활용합니다.
+
+## 핵심 기능 영역
+1. **티켓 관리**
+   - 티켓 생성/수정/삭제
+   - 상태 관리 (대기/진행중/완료/취소)
+   - 우선순위 설정
+
+2. **사용자 관리**
+   - 고객/관리자 권한 분리
+   - 인증/인가 시스템
+
+3. **알림 시스템**
+   - 카카오 알림톡 연동
+   - 이메일 알림
+   - 실시간 알림
+
+## 컴포넌트 구조
+```
+components/
+├── ui/                  # Radix UI 기반 기본 컴포넌트
+├── ticket/
+│   ├── TicketCard.tsx   # 티켓 카드 컴포넌트
+│   ├── TicketForm.tsx   # 티켓 생성/수정 폼
+│   └── TicketList.tsx   # 티켓 목록
+├── notification/
+│   ├── KakaoNotification.tsx
+│   └── EmailNotification.tsx
+└── layout/
+    ├── Header.tsx
+    ├── Sidebar.tsx
+
+    └── Footer.tsx
