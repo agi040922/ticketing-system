@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -22,7 +23,8 @@ interface OrderData {
   }[]
 }
 
-export default function PurchaseCompletePage() {
+// useSearchParams를 사용하는 컴포넌트를 별도로 분리
+function PurchaseCompleteContent() {
   const [orderData, setOrderData] = useState<OrderData | null>(null)
   const [qrCodeUrl, setQrCodeUrl] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -260,5 +262,29 @@ export default function PurchaseCompletePage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+// 로딩 폴백 컴포넌트
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <Card>
+        <CardContent className="p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-lg font-semibold mb-2">페이지 로딩 중...</p>
+          <p className="text-gray-600">잠시만 기다려주세요.</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+// 메인 페이지 컴포넌트 - Suspense로 감싸기
+export default function PurchaseCompletePage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <PurchaseCompleteContent />
+    </Suspense>
   )
 }
