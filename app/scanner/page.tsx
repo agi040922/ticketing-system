@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-
+import { Suspense } from "react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
@@ -49,7 +49,8 @@ interface TicketInfo {
   }
 }
 
-export default function ScannerPage() {
+// 메인 스캐너 컴포넌트를 별도로 분리
+function ScannerContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   
@@ -554,5 +555,21 @@ export default function ScannerPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+// 메인 컴포넌트에서 Suspense로 감싸기
+export default function ScannerPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    }>
+      <ScannerContent />
+    </Suspense>
   )
 }
