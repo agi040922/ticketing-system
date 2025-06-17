@@ -148,7 +148,7 @@ async function sendAlimtalkMessage(
   }
 
   // 메시지 데이터 구성
-  const messageData = {
+  const messageData: any = {
     receiver_uuids: [phone], // 수신자 목록
     template_object: {
       object_type: 'text',
@@ -166,7 +166,6 @@ async function sendAlimtalkMessage(
     const imageAttachments = attachments.filter(att => att.type === 'image');
     if (imageAttachments.length > 0) {
       messageData.template_object = {
-        ...messageData.template_object,
         object_type: 'feed',
         content: {
           title: templateParams.customerName ? `${templateParams.customerName}님의 입장권` : '입장권 발급',
@@ -266,7 +265,10 @@ function buildMessageText(templateCode: string, params: Record<string, any>): st
 
 📍 티켓 종류: ${params.ticketType || '일반권'}
 🔢 수량: ${params.quantity || 1}매
-📱 QR코드를 통해 입장해주세요.
+🔗 QR코드를 통해 입장해주세요.
+
+📱 QR코드를 스캔하거나 아래 링크를 클릭하여 
+티켓 정보를 확인하실 수 있습니다.
 
 입장 시 QR코드를 제시해주시기 바랍니다.`;
 
@@ -280,7 +282,10 @@ function buildMessageText(templateCode: string, params: Record<string, any>): st
 즐거운 시간 보내세요!`;
 
     default:
-      return `안녕하세요! ${params.customerName || '고객'}님께 알림을 드립니다.`;
+      return `안녕하세요! ${params.customerName || '고객'}님께 알림을 드립니다.
+
+🔗 QR코드를 스캔하거나 링크를 클릭하여 
+상세 정보를 확인해주세요.`;
   }
 }
 

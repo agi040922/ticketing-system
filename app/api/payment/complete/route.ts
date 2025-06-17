@@ -19,7 +19,7 @@ interface PaymentCompleteRequest {
 /**
  * 결제 완료 후 처리 API
  * - 주문 및 입장권 정보를 데이터베이스에 저장
- * - 각 입장권에 대한 고유 QR코드 생성
+ * - 각 입장권에 대한 고유 QR코드 생성 (링크 형태)
  * - Supabase Storage에 QR코드 이미지 업로드
  */
 export async function POST(request: NextRequest) {
@@ -91,15 +91,17 @@ export async function POST(request: NextRequest) {
       throw new Error(`주문 아이템 저장 실패: ${itemsError.message}`);
     }
 
-    // 3. 대표 QR코드 생성 및 Storage 저장
+    // 3. QR코드 링크 생성 및 Storage 저장
     const qrCodeData = `TICKET:${orderId}:${customerPhone}`;
-    const qrImageUrl = await createAndUploadQRCode(supabase, orderId, qrCodeData);
+    const ticketUrl = `https://ticketing-system-nnmi.vercel.app/scanner?code=${encodeURIComponent(qrCodeData)}`;
+    const qrImageUrl = await createAndUploadQRCode(supabase, orderId, ticketUrl);
 
     return NextResponse.json({
       success: true,
       message: '결제 처리 및 입장권 발급이 완료되었습니다.',
       orderId: orderId,
       qrImageUrl: qrImageUrl,
+      ticketUrl: ticketUrl,
       order: orderData
     });
 
@@ -114,17 +116,19 @@ export async function POST(request: NextRequest) {
 
 /**
  * QR코드 생성 및 Supabase Storage 업로드 함수
+ * 이제 링크 형태의 QR코드를 생성합니다
  */
-async function createAndUploadQRCode(supabase: any, orderId: string, qrCodeData: string): Promise<string> {
+async function createAndUploadQRCode(supabase: any, orderId: string, ticketUrl: string): Promise<string> {
   try {
-    // QR코드 생성 (Base64 데이터 URL 형태)
-    const qrCodeDataURL = await QRCode.toDataURL(qrCodeData, {
+    // QR코드 생성 (링크 형태, Base64 데이터 URL 형태)
+    const qrCodeDataURL = await QRCode.toDataURL(ticketUrl, {
       width: 300,
       margin: 2,
       color: {
         dark: '#000000',
         light: '#FFFFFF'
-      }
+      },
+      errorCorrectionLevel: 'M'
     });
 
     // Base64 데이터를 Buffer로 변환

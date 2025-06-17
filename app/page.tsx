@@ -8,25 +8,25 @@ import { ImageCarousel } from "@/components/image-carousel"
 export default function HomePage() {
   const carouselImages = [
     {
-      src: "/placeholder.svg?height=400&width=800",
+      src: "https://www.hanwha.co.kr/images/newsMedia/photo/20210118_news04.jpg",
       alt: "메인 수족관",
       title: "신비로운 바다 세계",
       description: "다양한 해양 생물들과 함께하는 특별한 경험",
     },
     {
-      src: "/placeholder.svg?height=400&width=800",
+      src: "https://www.coexaqua.com/media/xnrgpngi/7.jpg",
       alt: "터널 수족관",
       title: "언더워터 터널",
       description: "바다 속을 걷는 듯한 환상적인 체험",
     },
     {
-      src: "/placeholder.svg?height=400&width=800",
+      src: "https://lh4.googleusercontent.com/proxy/GSRV5R67OdQJ2UuS7rlXZZOgT6uITvqdKvj6-SXvx2xkCpgM2NKqkSi2C8_tDMStMtIgi_ULz3-nrmHSFxad8vglcBm5fXwGlOc-2zM",
       alt: "체험 프로그램",
       title: "체험 프로그램",
       description: "직접 만지고 느낄 수 있는 특별한 시간",
     },
     {
-      src: "/placeholder.svg?height=400&width=800",
+      src: "https://static.hanatour.com/product/2021/09/10/0649jis4fa/default.jpg",
       alt: "돌고래 쇼",
       title: "돌고래 퍼포먼스",
       description: "매일 진행되는 환상적인 돌고래 쇼",

@@ -12,26 +12,26 @@ export function NavigationHeader() {
     {
       title: "어드벤처체험",
       items: [
-        { name: "어드벤처 소개", href: "#" },
-        { name: "이용방법", href: "#" },
-        { name: "어드벤처체험 갤러리", href: "#" },
-        { name: "오시는 길", href: "#" },
+        { name: "어드벤처 소개", href: "/adventure/intro" },
+        { name: "이용방법", href: "/adventure/guide" },
+        { name: "어드벤처체험 갤러리", href: "/adventure/gallery" },
+        { name: "오시는 길", href: "/adventure/location" },
       ],
     },
     {
       title: "시설안내",
       items: [
-        { name: "코스구성", href: "#" },
-        { name: "편의시설", href: "#" },
+        { name: "코스구성", href: "/facilities/course" },
+        { name: "편의시설", href: "/facilities/amenities" },
       ],
     },
     {
       title: "이용안내",
       items: [
-        { name: "시설 이용안내", href: "#" },
-        { name: "이용제한 및 유의사항", href: "#" },
-        { name: "이용 안전수칙", href: "#" },
-        { name: "요금안내", href: "#" },
+        { name: "시설 이용안내", href: "/guide/facility" },
+        { name: "이용제한 및 유의사항", href: "/guide/restrictions" },
+        { name: "이용 안전수칙", href: "/guide/safety" },
+        { name: "요금안내", href: "/guide/pricing" },
       ],
     },
     {
@@ -44,9 +44,9 @@ export function NavigationHeader() {
     {
       title: "커뮤니티",
       items: [
-        { name: "공지사항", href: "#" },
-        { name: "자주하는 질문", href: "#" },
-        { name: "이벤트", href: "#" },
+        { name: "공지사항", href: "/community/notices" },
+        { name: "자주하는 질문", href: "/community/faq" },
+        { name: "이벤트", href: "/community/events" },
       ],
     },
   ]

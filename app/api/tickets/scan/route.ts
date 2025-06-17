@@ -211,12 +211,29 @@ export async function GET(request: NextRequest) {
 
 /**
  * QR코드 데이터에서 주문 정보를 추출하는 함수
+ * 링크 형태와 일반 텍스트 형태 모두 지원
  */
 function extractQRCodeData(qrData: string): { orderId: string | null, customerPhone: string | null } {
   try {
+    let processedData = qrData;
+    
+    // URL에서 code 파라미터 추출 (링크 형태의 QR코드 처리)
+    if (qrData.includes('scanner?code=')) {
+      try {
+        const url = new URL(qrData);
+        const code = url.searchParams.get('code');
+        if (code) {
+          processedData = decodeURIComponent(code);
+        }
+      } catch (urlError) {
+        console.error('URL 파싱 오류:', urlError);
+        // URL 파싱 실패 시 원본 데이터 그대로 사용
+      }
+    }
+    
     // TICKET:주문ID:전화번호 형식
-    if (qrData.startsWith('TICKET:')) {
-      const parts = qrData.split(':');
+    if (processedData.startsWith('TICKET:')) {
+      const parts = processedData.split(':');
       if (parts.length >= 3) {
         return {
           orderId: parts[1],
@@ -226,9 +243,9 @@ function extractQRCodeData(qrData: string): { orderId: string | null, customerPh
     }
     
     // UUID 형태의 주문 ID만 있는 경우 (하위 호환성)
-    if (qrData.length === 36 && qrData.includes('-')) {
+    if (processedData.length === 36 && processedData.includes('-')) {
       return {
-        orderId: qrData,
+        orderId: processedData,
         customerPhone: null
       };
     }
