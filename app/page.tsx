@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MapPin, Clock, Phone, Ticket, Calendar, Waves, Fish, Star } from "lucide-react"
+import { MapPin, Clock, Phone, Ticket, Calendar, TreePine, Zap, Star } from "lucide-react"
 import { NavigationHeader } from "@/components/navigation-header"
 import { ImageCarousel } from "@/components/image-carousel"
 
@@ -9,27 +9,27 @@ export default function HomePage() {
   const carouselImages = [
     {
       src: "https://www.hanwha.co.kr/images/newsMedia/photo/20210118_news04.jpg",
-      alt: "메인 수족관",
-      title: "신비로운 바다 세계",
-      description: "다양한 해양 생물들과 함께하는 특별한 경험",
+      alt: "어드벤처 놀이시설",
+      title: "스릴 넘치는 어드벤처",
+      description: "다양한 놀이시설과 함께하는 특별한 경험",
     },
     {
       src: "https://www.coexaqua.com/media/xnrgpngi/7.jpg",
-      alt: "터널 수족관",
-      title: "언더워터 터널",
-      description: "바다 속을 걷는 듯한 환상적인 체험",
+      alt: "자연 체험존",
+      title: "자연과 함께하는 시간",
+      description: "목포의 아름다운 자연을 만끽하세요",
     },
     {
       src: "https://lh4.googleusercontent.com/proxy/GSRV5R67OdQJ2UuS7rlXZZOgT6uITvqdKvj6-SXvx2xkCpgM2NKqkSi2C8_tDMStMtIgi_ULz3-nrmHSFxad8vglcBm5fXwGlOc-2zM",
       alt: "체험 프로그램",
       title: "체험 프로그램",
-      description: "직접 만지고 느낄 수 있는 특별한 시간",
+      description: "직접 참여하고 즐길 수 있는 특별한 시간",
     },
     {
       src: "https://static.hanatour.com/product/2021/09/10/0649jis4fa/default.jpg",
-      alt: "돌고래 쇼",
-      title: "돌고래 퍼포먼스",
-      description: "매일 진행되는 환상적인 돌고래 쇼",
+      alt: "가족 놀이존",
+      title: "가족 놀이존",
+      description: "온 가족이 함께 즐길 수 있는 공간",
     },
   ]
 
@@ -39,13 +39,13 @@ export default function HomePage() {
       <NavigationHeader />
 
       {/* Hero Section with Carousel */}
-      <section className="py-8 bg-gradient-to-b from-blue-50 to-white">
+      <section className="py-8 bg-gradient-to-b from-green-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <p className="text-lg mb-4 text-blue-600">영주에서 만나는 신비로운 세상</p>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gray-900">아쿠아리움 파크</h1>
+            <p className="text-lg mb-4 text-green-600">목포에서 만나는 특별한 즐거움</p>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-gray-900">목포 플레이파크</h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              다양한 해양 생물들과 함께하는 특별한 경험을 선사합니다. 가족과 함께 즐거운 시간을 보내세요.
+              다양한 놀이시설과 체험활동으로 온 가족이 함께 즐길 수 있는 특별한 공간입니다. 목포의 아름다운 자연과 함께 즐거운 시간을 보내세요.
             </p>
           </div>
 
@@ -101,37 +101,37 @@ export default function HomePage() {
             <div className="lg:col-span-2 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Card className="overflow-hidden">
-                  <div className="h-32 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                    <Fish className="h-12 w-12 text-white" />
+                  <div className="h-32 bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                    <TreePine className="h-12 w-12 text-white" />
                   </div>
                   <CardContent className="p-3">
-                    <h3 className="font-semibold">메인 수족관</h3>
-                    <p className="text-sm text-gray-600">대형 해양 생물 전시</p>
+                    <h3 className="font-semibold">자연 체험존</h3>
+                    <p className="text-sm text-gray-600">목포의 자연을 만끽</p>
                   </CardContent>
                 </Card>
                 <Card className="overflow-hidden">
-                  <div className="h-32 bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
-                    <Waves className="h-12 w-12 text-white" />
+                  <div className="h-32 bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+                    <Zap className="h-12 w-12 text-white" />
                   </div>
                   <CardContent className="p-3">
-                    <h3 className="font-semibold">터널 수족관</h3>
-                    <p className="text-sm text-gray-600">360도 바다 체험</p>
+                    <h3 className="font-semibold">어드벤처존</h3>
+                    <p className="text-sm text-gray-600">스릴 넘치는 놀이시설</p>
                   </CardContent>
                 </Card>
               </div>
 
               {/* Notice */}
-              <Card className="bg-blue-600 text-white">
+              <Card className="bg-green-600 text-white">
                 <CardContent className="p-6">
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
-                      <p className="text-blue-100 mb-2">2025. 06. 15 새단장 완료!</p>
+                      <p className="text-green-100 mb-2">2025. 06. 15 새단장 완료!</p>
                       <p className="text-sm">새로운 모습으로 여러분을 맞이합니다. 많은 관심 부탁드립니다.</p>
                     </div>
                     <Link href="/purchase">
                       <Button
                         variant="secondary"
-                        className="bg-white text-blue-600 hover:bg-gray-100 whitespace-nowrap"
+                        className="bg-white text-green-600 hover:bg-gray-100 whitespace-nowrap"
                       >
                         이용권 구매 →
                       </Button>
@@ -152,29 +152,29 @@ export default function HomePage() {
             <Card className="text-center hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
                 <Star className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                <CardTitle>돌고래 쇼</CardTitle>
+                <CardTitle>어드벤처 놀이</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  매일 오후 2시, 4시
+                  스릴 넘치는 놀이시설과
                   <br />
-                  환상적인 돌고래 퍼포먼스
+                  안전한 모험 체험
                   <br />
-                  가족 모두가 즐길 수 있는 시간
+                  온 가족이 즐길 수 있는 시간
                 </p>
               </CardContent>
             </Card>
 
             <Card className="text-center hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
-                <Fish className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                <CardTitle>터치 체험</CardTitle>
+                <TreePine className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                <CardTitle>자연 체험</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  직접 만져볼 수 있는
+                  목포의 아름다운 자연과
                   <br />
-                  안전한 해양 생물들
+                  함께하는 힐링 시간
                   <br />
                   교육적이고 재미있는 체험
                 </p>
@@ -183,16 +183,16 @@ export default function HomePage() {
 
             <Card className="text-center hover:shadow-lg transition-shadow duration-300">
               <CardHeader>
-                <Waves className="h-12 w-12 text-teal-500 mx-auto mb-4" />
-                <CardTitle>언더워터 터널</CardTitle>
+                <Zap className="h-12 w-12 text-purple-500 mx-auto mb-4" />
+                <CardTitle>액티비티 존</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  바다 속을 걷는 듯한
+                  다양한 액티비티와
                   <br />
-                  360도 파노라마 뷰
+                  인터랙티브 체험
                   <br />
-                  인생샷 명소
+                  특별한 추억 만들기
                 </p>
               </CardContent>
             </Card>
@@ -211,24 +211,24 @@ export default function HomePage() {
                   <thead className="bg-gray-100">
                     <tr>
                       <th className="px-6 py-4 text-left font-semibold">구분</th>
-                      <th className="px-6 py-4 text-center font-semibold">관람료</th>
+                      <th className="px-6 py-4 text-center font-semibold">이용료</th>
                       <th className="px-6 py-4 text-center font-semibold">비고</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr className="border-b">
                       <td className="px-6 py-4 font-medium">소인</td>
-                      <td className="px-6 py-4 text-center font-bold text-blue-600 text-lg">18,000원</td>
+                      <td className="px-6 py-4 text-center font-bold text-green-600 text-lg">18,000원</td>
                       <td className="px-6 py-4 text-center text-sm text-gray-600">만4세 이상</td>
                     </tr>
                     <tr className="border-b">
                       <td className="px-6 py-4 font-medium">청소년</td>
-                      <td className="px-6 py-4 text-center font-bold text-blue-600 text-lg">20,000원</td>
+                      <td className="px-6 py-4 text-center font-bold text-green-600 text-lg">20,000원</td>
                       <td className="px-6 py-4 text-center text-sm text-gray-600">13세 ~ 18세 이하</td>
                     </tr>
                     <tr>
                       <td className="px-6 py-4 font-medium">대인</td>
-                      <td className="px-6 py-4 text-center font-bold text-blue-600 text-lg">25,000원</td>
+                      <td className="px-6 py-4 text-center font-bold text-green-600 text-lg">25,000원</td>
                       <td className="px-6 py-4 text-center text-sm text-gray-600">19세 이상</td>
                     </tr>
                   </tbody>
@@ -252,14 +252,14 @@ export default function HomePage() {
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="text-center">
               <CardHeader>
-                <MapPin className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                <MapPin className="h-12 w-12 text-green-600 mx-auto mb-4" />
                 <CardTitle>위치 안내</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  서울시 강남구 테헤란로 123
+                  전라남도 목포시 삼학로 123
                   <br />
-                  지하철 2호선 강남역 3번 출구
+                  목포역에서 차량 15분 거리
                   <br />
                   주차장 완비 (무료)
                 </p>
@@ -268,7 +268,7 @@ export default function HomePage() {
 
             <Card className="text-center">
               <CardHeader>
-                <Clock className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                <Clock className="h-12 w-12 text-green-600 mx-auto mb-4" />
                 <CardTitle>운영 시간</CardTitle>
               </CardHeader>
               <CardContent>
@@ -284,14 +284,14 @@ export default function HomePage() {
 
             <Card className="text-center">
               <CardHeader>
-                <Phone className="h-12 w-12 text-blue-600 mx-auto mb-4" />
+                <Phone className="h-12 w-12 text-green-600 mx-auto mb-4" />
                 <CardTitle>문의 전화</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  대표번호: 02-1234-5678
+                  대표번호: 061-1234-5678
                   <br />
-                  예약문의: 02-1234-5679
+                  예약문의: 061-1234-5679
                   <br />
                   운영시간 내 상담 가능
                 </p>
@@ -325,7 +325,7 @@ export default function HomePage() {
                     <span className="text-xs text-gray-500">2025-04-06</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b hover:bg-gray-50 transition-colors">
-                    <span className="text-sm">돌고래 쇼 시간 변경 안내</span>
+                    <span className="text-sm">어드벤처 프로그램 시간 변경 안내</span>
                     <span className="text-xs text-gray-500">2025-04-05</span>
                   </div>
                   <div className="flex justify-between items-center py-2 hover:bg-gray-50 transition-colors">
@@ -341,14 +341,14 @@ export default function HomePage() {
               <Card className="bg-gray-900 text-white">
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold mb-2">현장문의</h3>
-                  <p className="text-3xl font-bold">054-639-4842</p>
+                  <p className="text-3xl font-bold">061-639-4842</p>
                   <p className="text-sm text-gray-300 mt-2">현장 상황 및 긴급 문의</p>
                 </CardContent>
               </Card>
               <Card className="bg-orange-600 text-white">
                 <CardContent className="p-6">
                   <h3 className="text-xl font-bold mb-2">고객센터</h3>
-                  <p className="text-3xl font-bold">054-639-4842</p>
+                  <p className="text-3xl font-bold">061-639-4842</p>
                   <p className="text-sm text-orange-100 mt-2">예약 및 일반 문의</p>
                 </CardContent>
               </Card>
@@ -362,9 +362,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 items-center">
             <div>
-              <h3 className="text-3xl font-bold mb-4">아쿠아리움 파크 SNS</h3>
+              <h3 className="text-3xl font-bold mb-4">목포 플레이파크 SNS</h3>
               <p className="text-gray-300 mb-6">
-                아쿠아리움 파크의 최신 소식을
+                목포 플레이파크의 최신 소식을
                 <br />
                 SNS로 만나보세요.
               </p>
@@ -405,15 +405,15 @@ export default function HomePage() {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center mb-4">
-                <Ticket className="h-8 w-8 text-blue-400 mr-3" />
-                <h3 className="text-xl font-bold">아쿠아리움 파크</h3>
+                <TreePine className="h-8 w-8 text-green-400 mr-3" />
+                <h3 className="text-xl font-bold">목포 플레이파크</h3>
               </div>
               <p className="text-gray-400 text-sm">
-                주소: 경상북도 영주시 가흥동 123-45
+                주소: 전라남도 목포시 삼학로 123
                 <br />
-                전화: 054-639-4842
+                전화: 061-639-4842
                 <br />
-                이메일: support@aquarium.kr
+                이메일: support@mokpoplaypark.kr
               </p>
             </div>
             <div>
@@ -494,7 +494,7 @@ export default function HomePage() {
           </div>
           <hr className="my-8 border-gray-700" />
           <div className="text-center text-gray-400 text-sm">
-            <p>© 2024 아쿠아리움 파크. All rights reserved.</p>
+            <p>© 2024 목포 플레이파크. All rights reserved.</p>
           </div>
         </div>
       </footer>

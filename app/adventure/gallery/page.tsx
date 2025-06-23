@@ -7,34 +7,34 @@ import { ArrowLeft, Camera, Heart, Share } from "lucide-react"
 export default function AdventureGalleryPage() {
   const galleryImages = [
     {
-      src: "https://www.coexaqua.com/media/xnrgpngi/7.jpg",
-      title: "언더워터 터널",
-      description: "바다 속을 걷는 듯한 환상적인 경험"
-    },
-    {
       src: "https://www.hanwha.co.kr/images/newsMedia/photo/20210118_news04.jpg",
-      title: "메인 수족관",
-      description: "다양한 해양 생물들의 아름다운 모습"
+      title: "스릴 놀이기구",
+      description: "짜릿한 스릴을 선사하는 다양한 놀이기구들"
     },
     {
       src: "https://static.hanatour.com/product/2021/09/10/0649jis4fa/default.jpg",
-      title: "돌고래 퍼포먼스",
-      description: "매일 진행되는 특별한 돌고래 쇼"
+      title: "자연 체험존",
+      description: "목포의 아름다운 자연 속에서 즐기는 생태 체험"
     },
     {
       src: "https://www.coexaqua.com/media/xnrgpngi/7.jpg",
-      title: "터치 체험존",
-      description: "직접 만져볼 수 있는 해양 생물들"
+      title: "가족 놀이시설",
+      description: "온 가족이 함께 즐길 수 있는 안전한 놀이공간"
     },
     {
       src: "https://www.hanwha.co.kr/images/newsMedia/photo/20210118_news04.jpg",
-      title: "피딩 쇼",
-      description: "전문 다이버의 먹이주기 체험"
+      title: "어드벤처 체험",
+      description: "모험과 스릴이 가득한 특별한 체험활동"
     },
     {
       src: "https://static.hanatour.com/product/2021/09/10/0649jis4fa/default.jpg",
-      title: "4D 시뮬레이션",
-      description: "최신 기술로 구현된 심해 탐험"
+      title: "자연 학습 프로그램",
+      description: "아이들을 위한 교육적인 자연 학습 체험"
+    },
+    {
+      src: "https://www.coexaqua.com/media/xnrgpngi/7.jpg",
+      title: "계절별 특별 프로그램",
+      description: "사계절 내내 즐길 수 있는 다양한 이벤트"
     }
   ]
 
@@ -43,7 +43,7 @@ export default function AdventureGalleryPage() {
       <NavigationHeader />
       
       {/* Header Section */}
-      <section className="py-8 bg-gradient-to-b from-blue-50 to-white">
+      <section className="py-8 bg-gradient-to-b from-green-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center mb-6">
             <Link href="/adventure/intro">
@@ -53,8 +53,8 @@ export default function AdventureGalleryPage() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">어드벤처체험 갤러리</h1>
-              <p className="text-gray-600 mt-2">아쿠아리움 파크의 아름다운 순간들</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">갤러리</h1>
+              <p className="text-gray-600 mt-2">목포 플레이파크의 아름다운 순간들</p>
             </div>
           </div>
         </div>
@@ -103,13 +103,13 @@ export default function AdventureGalleryPage() {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">📸 최적 촬영 위치</h3>
                 <p className="text-gray-600 mb-4">
-                  언더워터 터널 중앙 지점과 메인 수족관 정면에서 가장 아름다운 사진을 촬영할 수 있습니다.
+                  롤러코스터 전망대와 자연 체험존 중앙에서 가장 아름다운 사진을 촬영할 수 있습니다.
                 </p>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">⚠️ 촬영 주의사항</h3>
                 <p className="text-gray-600 mb-4">
-                  플래시 촬영은 금지되며, 해양 생물의 스트레스를 줄이기 위해 조용히 촬영해주세요.
+                  놀이기구 이용 중 촬영은 안전상 금지되며, 다른 이용객의 프라이버시를 존중해주세요.
                 </p>
               </div>
             </div>
@@ -118,10 +118,10 @@ export default function AdventureGalleryPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-blue-600 text-white">
+      <section className="py-16 bg-green-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">당신만의 특별한 순간을 만들어보세요</h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-green-100 mb-8">
             아름다운 추억과 함께 소중한 사진들을 남겨가세요
           </p>
           <Link href="/purchase">

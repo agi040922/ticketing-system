@@ -2,7 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { NavigationHeader } from "@/components/navigation-header"
-import { ArrowLeft, Waves, Star, Shield, MapPin, Clock, Users, Fish } from "lucide-react"
+import { ArrowLeft, TreePine, Star, Shield, MapPin, Clock, Users, Zap } from "lucide-react"
 
 export default function AdventureIntroPage() {
   return (
@@ -10,7 +10,7 @@ export default function AdventureIntroPage() {
       <NavigationHeader />
       
       {/* Header Section */}
-      <section className="py-8 bg-gradient-to-b from-blue-50 to-white">
+      <section className="py-8 bg-gradient-to-b from-green-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center mb-6">
             <Link href="/">
@@ -20,8 +20,8 @@ export default function AdventureIntroPage() {
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">어드벤처 소개</h1>
-              <p className="text-gray-600 mt-2">바다 속 신비로운 세계로의 특별한 여행</p>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">소개</h1>
+              <p className="text-gray-600 mt-2">목포의 자연과 함께하는 특별한 어드벤처 체험</p>
             </div>
           </div>
         </div>
@@ -33,22 +33,22 @@ export default function AdventureIntroPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                바다의 신비를<br />
-                <span className="text-blue-600">직접 체험하세요</span>
+                자연과 모험이<br />
+                <span className="text-green-600">하나되는 곳</span>
               </h2>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                아쿠아리움 파크는 단순한 관람을 넘어서 진정한 해양 어드벤처를 제공합니다. 
-                80m 길이의 언더워터 터널에서 상어와 함께 수영하는 듯한 경험부터, 
-                직접 만져볼 수 있는 터치존까지, 모든 연령대가 즐길 수 있는 특별한 공간입니다.
+                목포 플레이파크는 단순한 놀이시설을 넘어서 진정한 자연 어드벤처를 제공합니다. 
+                스릴 넘치는 놀이기구부터 자연과 함께하는 체험활동까지, 
+                모든 연령대가 즐길 수 있는 특별한 공간입니다.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/purchase">
-                  <Button size="lg" className="px-8">
+                  <Button size="lg" className="px-8 bg-green-600 hover:bg-green-700">
                     지금 예약하기
                   </Button>
                 </Link>
                 <Link href="/adventure/guide">
-                  <Button size="lg" variant="outline" className="px-8">
+                  <Button size="lg" variant="outline" className="px-8 border-green-600 text-green-600 hover:bg-green-50">
                     이용방법 보기
                   </Button>
                 </Link>
@@ -56,14 +56,14 @@ export default function AdventureIntroPage() {
             </div>
             <div className="relative">
               <img 
-                src="https://www.coexaqua.com/media/xnrgpngi/7.jpg"
-                alt="언더워터 터널"
+                src="https://www.hanwha.co.kr/images/newsMedia/photo/20210118_news04.jpg"
+                alt="플레이파크 어드벤처"
                 className="w-full h-96 object-cover rounded-2xl shadow-xl"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-2xl"></div>
               <div className="absolute bottom-6 left-6 text-white">
-                <h3 className="text-xl font-bold">언더워터 터널</h3>
-                <p className="text-sm">360도 바다 속 세계</p>
+                <h3 className="text-xl font-bold">어드벤처 체험</h3>
+                <p className="text-sm">스릴과 자연이 만나는 곳</p>
               </div>
             </div>
           </div>
@@ -77,20 +77,20 @@ export default function AdventureIntroPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <Card className="text-center border-none shadow-lg">
               <CardContent className="p-6">
-                <Waves className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">언더워터 터널</h3>
+                <TreePine className="h-12 w-12 text-green-600 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">자연 체험</h3>
                 <p className="text-gray-600 text-sm">
-                  80m 길이의 투명한 터널을 걸으며 상어와 가오리가 머리 위로 지나가는 장관을 경험하세요
+                  목포의 아름다운 자연 속에서 다양한 생태 체험과 숲속 어드벤처를 즐기세요
                 </p>
               </CardContent>
             </Card>
 
             <Card className="text-center border-none shadow-lg">
               <CardContent className="p-6">
-                <Fish className="h-12 w-12 text-teal-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">터치존 체험</h3>
+                <Zap className="h-12 w-12 text-orange-600 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">스릴 놀이기구</h3>
                 <p className="text-gray-600 text-sm">
-                  불가사리, 성게, 작은 상어들을 직접 만져보며 해양생물과 교감할 수 있는 특별한 공간
+                  짜릿한 스릴을 선사하는 다양한 놀이기구로 잊을 수 없는 추억을 만들어보세요
                 </p>
               </CardContent>
             </Card>
@@ -98,16 +98,16 @@ export default function AdventureIntroPage() {
             <Card className="text-center border-none shadow-lg">
               <CardContent className="p-6">
                 <Star className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">돌고래 쇼</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">특별 프로그램</h3>
                 <p className="text-gray-600 text-sm">
-                  매일 2회 진행되는 돌고래 퍼포먼스로 지능적이고 아름다운 돌고래의 모습을 감상하세요
+                  계절별 특별 이벤트와 체험 프로그램으로 더욱 풍성한 즐거움을 선사합니다
                 </p>
               </CardContent>
             </Card>
 
             <Card className="text-center border-none shadow-lg">
               <CardContent className="p-6">
-                <Shield className="h-12 w-12 text-green-600 mx-auto mb-4" />
+                <Shield className="h-12 w-12 text-blue-600 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">안전한 환경</h3>
                 <p className="text-gray-600 text-sm">
                   최신 안전 시설과 전문 가이드가 함께하여 모든 연령대가 안심하고 즐길 수 있습니다
@@ -121,45 +121,45 @@ export default function AdventureIntroPage() {
       {/* Statistics */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">아쿠아리움 파크 현황</h2>
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">목포 플레이파크 현황</h2>
           <div className="grid md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">300+</div>
-              <div className="text-gray-600">종의 해양생물</div>
+              <div className="text-4xl font-bold text-green-600 mb-2">15+</div>
+              <div className="text-gray-600">다양한 놀이기구</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">50,000+</div>
-              <div className="text-gray-600">마리의 물고기</div>
+              <div className="text-4xl font-bold text-green-600 mb-2">50,000㎡</div>
+              <div className="text-gray-600">넓은 자연 부지</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">80m</div>
-              <div className="text-gray-600">언더워터 터널</div>
+              <div className="text-4xl font-bold text-green-600 mb-2">10+</div>
+              <div className="text-gray-600">체험 프로그램</div>
             </div>
             <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">10,000㎡</div>
-              <div className="text-gray-600">총 관람 면적</div>
+              <div className="text-4xl font-bold text-green-600 mb-2">100,000+</div>
+              <div className="text-gray-600">연간 방문객</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Marine Life Highlights */}
-      <section className="py-16 bg-blue-50">
+      {/* Activity Highlights */}
+      <section className="py-16 bg-green-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">만나볼 수 있는 해양생물들</h2>
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">즐길 수 있는 활동들</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="overflow-hidden">
               <div className="relative">
                 <img 
-                  src="https://static.hanatour.com/product/2021/09/10/0649jis4fa/default.jpg"
-                  alt="상어"
+                  src="https://www.hanwha.co.kr/images/newsMedia/photo/20210118_news04.jpg"
+                  alt="어드벤처 놀이기구"
                   className="w-full h-48 object-cover"
                 />
               </div>
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">대형 상어</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">스릴 놀이기구</h3>
                 <p className="text-gray-600">
-                  화이트팁 상어, 블랙팁 상어 등 다양한 종류의 상어들이 웅장하게 헤엄치는 모습을 가까이서 관찰할 수 있습니다.
+                  롤러코스터, 바이킹, 자이로드롭 등 다양한 스릴 넘치는 놀이기구들이 짜릿한 재미를 선사합니다.
                 </p>
               </CardContent>
             </Card>
@@ -167,15 +167,15 @@ export default function AdventureIntroPage() {
             <Card className="overflow-hidden">
               <div className="relative">
                 <img 
-                  src="https://www.hanwha.co.kr/images/newsMedia/photo/20210118_news04.jpg"
-                  alt="가오리"
+                  src="https://static.hanatour.com/product/2021/09/10/0649jis4fa/default.jpg"
+                  alt="자연 체험"
                   className="w-full h-48 object-cover"
                 />
               </div>
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">거대 가오리</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">자연 체험 프로그램</h3>
                 <p className="text-gray-600">
-                  날개를 펼친 듯 우아하게 헤엄치는 대형 가오리의 신비로운 모습을 터널에서 감상하세요.
+                  목포의 아름다운 자연 속에서 생태 관찰, 숲속 산책, 자연 학습 체험을 즐겨보세요.
                 </p>
               </CardContent>
             </Card>
@@ -184,14 +184,14 @@ export default function AdventureIntroPage() {
               <div className="relative">
                 <img 
                   src="https://www.coexaqua.com/media/xnrgpngi/7.jpg"
-                  alt="열대어"
+                  alt="가족 놀이"
                   className="w-full h-48 object-cover"
                 />
               </div>
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">형형색색 열대어</h3>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">가족 놀이 시설</h3>
                 <p className="text-gray-600">
-                  아름다운 색깔의 열대어들과 신비로운 산호 정원에서 마치 바다 속 파라다이스를 경험하세요.
+                  어린이부터 어른까지 온 가족이 함께 즐길 수 있는 안전하고 재미있는 놀이 시설들입니다.
                 </p>
               </CardContent>
             </Card>
@@ -206,7 +206,7 @@ export default function AdventureIntroPage() {
           <div className="grid md:grid-cols-3 gap-8">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center text-blue-600">
+                <CardTitle className="flex items-center text-green-600">
                   <Clock className="h-5 w-5 mr-2" />
                   운영시간
                 </CardTitle>
@@ -222,7 +222,7 @@ export default function AdventureIntroPage() {
                     <p className="text-gray-600">09:00 - 20:00</p>
                   </div>
                   <div>
-                    <p className="font-semibold text-red-600">휴관일</p>
+                    <p className="font-semibold text-red-600">휴장일</p>
                     <p className="text-red-600">매주 월요일</p>
                   </div>
                 </div>
@@ -238,16 +238,16 @@ export default function AdventureIntroPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <p className="font-semibold">아쿠아리움 파크</p>
-                  <p className="text-gray-600">서울특별시 강남구<br />테헤란로 123길 45</p>
-                  <p className="text-gray-600">지하철 2호선 강남역<br />3번 출구에서 도보 10분</p>
+                  <p className="font-semibold">목포 플레이파크</p>
+                  <p className="text-gray-600">전라남도 목포시<br />플레이파크로 123</p>
+                  <p className="text-gray-600">목포역에서 차량 15분<br />무료 주차장 완비</p>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center text-purple-600">
+                <CardTitle className="flex items-center text-green-600">
                   <Users className="h-5 w-5 mr-2" />
                   요금정보
                 </CardTitle>
@@ -267,7 +267,7 @@ export default function AdventureIntroPage() {
                     <p className="text-gray-600">18,000원</p>
                   </div>
                   <Link href="/guide/pricing">
-                    <Button variant="outline" size="sm" className="w-full mt-3">
+                    <Button variant="outline" size="sm" className="w-full mt-3 border-green-600 text-green-600 hover:bg-green-50">
                       상세 요금 보기
                     </Button>
                   </Link>
@@ -279,11 +279,11 @@ export default function AdventureIntroPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-blue-600 text-white">
+      <section className="py-16 bg-green-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">바다 속 어드벤처가 기다립니다!</h2>
-          <p className="text-xl text-blue-100 mb-8">
-            잊을 수 없는 해양 체험을 위해 지금 예약하세요
+          <h2 className="text-3xl font-bold mb-4">자연과 모험이 기다립니다!</h2>
+          <p className="text-xl text-green-100 mb-8">
+            잊을 수 없는 목포 플레이파크 체험을 위해 지금 예약하세요
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/purchase">
@@ -292,7 +292,7 @@ export default function AdventureIntroPage() {
               </Button>
             </Link>
             <Link href="/adventure/gallery">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600 px-8 py-3">
                 갤러리 보기
               </Button>
             </Link>

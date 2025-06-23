@@ -39,42 +39,95 @@ export default function PurchasePage() {
     setIsLoading(true)
 
     try {
-      // Supabase에 주문 저장
-      const orderId = uuidv4()
+      // 주문 ID 생성 (빌게이트 형식에 맞게)
+      const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       
-      const response = await fetch('/api/payment/complete', {
+      // 빌게이트 결제 준비 API 호출
+      const prepareResponse = await fetch('/api/payment/prepare', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          serviceId: 'M2103135',  // 테스트 서비스 ID
           orderId: orderId,
-          customerId: customerInfo.email || customerInfo.phone,
-          ticketType: `대인 ${adultCount}매, 소인 ${childCount}매`,
-          quantity: adultCount + childCount,
-          totalAmount: totalPrice,
-          customerPhone: customerInfo.phone,
-          customerName: customerInfo.name,
-          customerEmail: customerInfo.email,
-          adultCount: adultCount,
-          childCount: childCount
+          amount: totalPrice
         })
       })
 
-      const result = await response.json()
+      const prepareResult = await prepareResponse.json()
 
-      if (result.success) {
-        // 성공 시 완료 페이지로 이동
-        router.push(`/purchase/complete?orderId=${orderId}&success=true`)
-      } else {
-        throw new Error(result.message || "주문 처리 중 오류가 발생했습니다.")
+      if (!prepareResult.success) {
+        throw new Error(prepareResult.error || "결제 준비 중 오류가 발생했습니다.")
       }
+
+      // 주문 정보를 localStorage에 임시 저장 (결제 완료 후 사용)
+      localStorage.setItem('pendingOrder', JSON.stringify({
+        orderId: orderId,
+        customerId: customerInfo.email || customerInfo.phone,
+        ticketType: `대인 ${adultCount}매, 소인 ${childCount}매`,
+        quantity: adultCount + childCount,
+        totalAmount: totalPrice,
+        customerPhone: customerInfo.phone,
+        customerName: customerInfo.name,
+        customerEmail: customerInfo.email,
+        adultCount: adultCount,
+        childCount: childCount
+      }))
+
+      // 빌게이트 결제창 호출
+      openBillgatePayment(prepareResult.data)
+
     } catch (error) {
-      console.error('주문 처리 오류:', error)
-      alert(error instanceof Error ? error.message : '주문 처리 중 오류가 발생했습니다.')
-    } finally {
+      console.error('결제 준비 오류:', error)
+      alert(error instanceof Error ? error.message : '결제 준비 중 오류가 발생했습니다.')
       setIsLoading(false)
     }
+  }
+
+  // 빌게이트 결제창 호출 함수
+  const openBillgatePayment = (paymentData: any) => {
+    // 결제 폼 동적 생성
+    const form = document.createElement('form')
+    form.method = 'POST'
+    form.action = paymentData.PAYMENT_URL
+    form.target = '_blank'  // 새 창에서 열기
+    
+    // 결제 파라미터들을 Hidden Input으로 추가
+    const params = {
+      SERVICE_ID: paymentData.SERVICE_ID,
+      SERVICE_TYPE: paymentData.SERVICE_TYPE,
+      SERVICE_CODE: paymentData.SERVICE_CODE,
+      ORDER_ID: paymentData.ORDER_ID,
+      ORDER_DATE: paymentData.ORDER_DATE,
+      AMOUNT: paymentData.AMOUNT,
+      CHECK_SUM: paymentData.CHECK_SUM,
+      RETURN_URL: paymentData.RETURN_URL,
+      CANCEL_FLAG: paymentData.CANCEL_FLAG,
+      ITEM_NAME: `어드벤처 입장권 ${adultCount + childCount}매`,
+      ITEM_CODE: 'ADVENTURE_TICKET',
+      USER_NAME: customerInfo.name,
+      USER_EMAIL: customerInfo.email,
+      USER_PHONE: customerInfo.phone
+    }
+
+    Object.entries(params).forEach(([key, value]) => {
+      const input = document.createElement('input')
+      input.type = 'hidden'
+      input.name = key
+      input.value = value || ''
+      form.appendChild(input)
+    })
+
+    // 폼을 DOM에 추가하고 submit
+    document.body.appendChild(form)
+    form.submit()
+    document.body.removeChild(form)
+
+    // 결제창이 열린 후 로딩 상태 해제
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 1000)
   }
 
   return (

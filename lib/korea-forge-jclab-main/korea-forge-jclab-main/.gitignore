@@ -1,0 +1,23 @@
+
+*.py[co]
+*.sw[nop]
+*~
+.cdtproject
+.classpath
+.cproject
+.nyc_output
+.project
+.settings
+.vscode
+TAGS
+coverage
+dist
+node_modules
+npm-debug.log
+
+# yarn v2
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
