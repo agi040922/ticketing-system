@@ -4,29 +4,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MapPin, Clock, Phone, Ticket, Calendar, TreePine, Zap, Star } from "lucide-react"
 import { NavigationHeader } from "@/components/navigation-header"
 import { ImageCarousel } from "@/components/image-carousel"
+import Image from "next/image"
 
 export default function HomePage() {
   const carouselImages = [
     {
-      src: "https://www.hanwha.co.kr/images/newsMedia/photo/20210118_news04.jpg",
+      src: "/배경.jpg",
       alt: "어드벤처 놀이시설",
       title: "스릴 넘치는 어드벤처",
       description: "다양한 놀이시설과 함께하는 특별한 경험",
     },
     {
-      src: "https://www.coexaqua.com/media/xnrgpngi/7.jpg",
+      src: "/실내부.jpg",
       alt: "자연 체험존",
       title: "자연과 함께하는 시간",
       description: "목포의 아름다운 자연을 만끽하세요",
     },
     {
-      src: "https://lh4.googleusercontent.com/proxy/GSRV5R67OdQJ2UuS7rlXZZOgT6uITvqdKvj6-SXvx2xkCpgM2NKqkSi2C8_tDMStMtIgi_ULz3-nrmHSFxad8vglcBm5fXwGlOc-2zM",
+      src: "/실내부1.jpg",
       alt: "체험 프로그램",
       title: "체험 프로그램",
       description: "직접 참여하고 즐길 수 있는 특별한 시간",
     },
     {
-      src: "https://static.hanatour.com/product/2021/09/10/0649jis4fa/default.jpg",
+      src: "/실내부2.jpg",
       alt: "가족 놀이존",
       title: "가족 놀이존",
       description: "온 가족이 함께 즐길 수 있는 공간",
@@ -206,33 +207,14 @@ export default function HomePage() {
           <h3 className="text-3xl font-bold text-center text-gray-900 mb-12">요금안내</h3>
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-lg overflow-hidden shadow-lg">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-100">
-                    <tr>
-                      <th className="px-6 py-4 text-left font-semibold">구분</th>
-                      <th className="px-6 py-4 text-center font-semibold">이용료</th>
-                      <th className="px-6 py-4 text-center font-semibold">비고</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="px-6 py-4 font-medium">소인</td>
-                      <td className="px-6 py-4 text-center font-bold text-green-600 text-lg">18,000원</td>
-                      <td className="px-6 py-4 text-center text-sm text-gray-600">만4세 이상</td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="px-6 py-4 font-medium">청소년</td>
-                      <td className="px-6 py-4 text-center font-bold text-green-600 text-lg">20,000원</td>
-                      <td className="px-6 py-4 text-center text-sm text-gray-600">13세 ~ 18세 이하</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 font-medium">대인</td>
-                      <td className="px-6 py-4 text-center font-bold text-green-600 text-lg">25,000원</td>
-                      <td className="px-6 py-4 text-center text-sm text-gray-600">19세 이상</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div className="flex justify-center p-8">
+                <Image
+                  src="/이용요금표.jpg"
+                  alt="목포 플레이파크 이용요금표"
+                  width={600}
+                  height={400}
+                  className="max-w-full h-auto rounded-lg"
+                />
               </div>
             </div>
             <div className="text-center mt-8">

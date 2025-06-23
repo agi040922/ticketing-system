@@ -43,7 +43,7 @@ export function ImageCarousel({ images, autoPlay = true, interval = 5000 }: Imag
   }
 
   return (
-    <div className="relative w-full h-96 overflow-hidden rounded-lg bg-gray-200">
+    <div className="relative w-full h-[500px] overflow-hidden rounded-lg bg-gray-200">
       {/* Images */}
       <div
         className="flex transition-transform duration-500 ease-in-out h-full"
@@ -54,8 +54,8 @@ export function ImageCarousel({ images, autoPlay = true, interval = 5000 }: Imag
             <img src={image.src || "/placeholder.svg"} alt={image.alt} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
               <div className="text-center text-white">
-                <h3 className="text-2xl font-bold mb-2">{image.title}</h3>
-                <p className="text-lg">{image.description}</p>
+                <h3 className="text-3xl font-bold mb-4">{image.title}</h3>
+                <p className="text-xl">{image.description}</p>
               </div>
             </div>
           </div>
