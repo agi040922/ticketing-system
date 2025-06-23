@@ -1,16 +1,15 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
 
 /**
- * 빌게이트 결제 완료 후 리턴 페이지
- * 결제창에서 결제 완료 후 사용자가 리디렉션되는 페이지
+ * 빌게이트 결제 완료 후 리턴 페이지 내부 컴포넌트
  */
-export default function PaymentReturnPage() {
+function PaymentReturnContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [status, setStatus] = useState<'processing' | 'success' | 'failed'>('processing')
@@ -184,5 +183,33 @@ export default function PaymentReturnPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+/**
+ * 빌게이트 결제 완료 후 리턴 페이지
+ * 결제창에서 결제 완료 후 사용자가 리디렉션되는 페이지
+ */
+export default function PaymentReturnPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Loader2 className="h-16 w-16 text-blue-500 animate-spin" />
+            </div>
+            <CardTitle className="text-xl">결제 처리 중...</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center text-gray-600">
+              결제 결과를 확인하고 있습니다. 잠시만 기다려주세요.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    }>
+      <PaymentReturnContent />
+    </Suspense>
   )
 } 
