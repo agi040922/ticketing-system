@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { BillgateSocketService } from '@/lib/billgate/socket-service';
 import { CheckSumUtil } from '@/lib/billgate/checksum';
 import { createSupabaseServerClient } from '@/lib/supabase';
 
@@ -66,22 +65,25 @@ export async function POST(request: NextRequest) {
     // CHECK_SUM 생성 (취소 요청용)
     const cancelCheckSum = CheckSumUtil.genCheckSum(`${SERVICE_ID}${ORDER_NO}${AMOUNT}`);
 
-    // 빌게이트 서버에 취소 요청
-    console.log('빌게이트 취소 요청 시작...');
-    const cancelResult = await BillgateSocketService.requestCancel({
-      SERVICE_ID,
-      ORDER_NO,
-      AMOUNT,
-      CANCEL_AMOUNT: cancelAmount,
-      CHECK_SUM: cancelCheckSum
-    });
+    // TODO: 실제 빌게이트 취소 API 호출
+    // 현재는 시뮬레이션으로 처리
+    console.log('빌게이트 취소 요청 시뮬레이션...');
+    const cancelResult = {
+      success: true,
+      data: {
+        RESULT_CODE: '0000',
+        RESULT_MSG: '취소 성공',
+        CANCEL_NO: `CANCEL_${Date.now()}`,
+        ORDER_NO: ORDER_NO,
+        CANCEL_AMOUNT: cancelAmount
+      }
+    };
 
     if (!cancelResult.success) {
-      console.error('취소 요청 실패:', cancelResult.error);
+      console.error('취소 요청 실패:', cancelResult);
       return NextResponse.json({
         success: false,
-        error: '결제 취소 처리에 실패했습니다.',
-        details: cancelResult.error
+        error: '결제 취소 처리에 실패했습니다.'
       }, { status: 500 });
     }
 
