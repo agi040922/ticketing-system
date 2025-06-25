@@ -76,6 +76,9 @@ export default function PurchasePage() {
     setIsLoading(true)
 
     try {
+      // 환경변수 디버깅
+      console.log('BILLGATE_SERVICE_ID:', process.env.NEXT_PUBLIC_BILLGATE_SERVICE_ID)
+      
       // 주문 ID 생성 (빌게이트 형식에 맞게)
       const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       
@@ -86,7 +89,7 @@ export default function PurchasePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          serviceId: process.env.NEXT_PUBLIC_BILLGATE_SERVICE_ID,
+          serviceId: process.env.NEXT_PUBLIC_BILLGATE_SERVICE_ID || 'M2103135',
           orderId: orderId,
           amount: totalPrice
         })
