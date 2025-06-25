@@ -1,48 +1,84 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { NavigationHeader } from "@/components/navigation-header"
-import { ArrowLeft, Bell, Calendar, User, ChevronRight } from "lucide-react"
+import { ArrowLeft, Bell, Calendar, User, ChevronRight, Loader2, Eye } from "lucide-react"
+
+interface Notice {
+  id: string
+  title: string
+  content: string
+  category: string
+  is_important: boolean
+  author: string
+  status: string
+  view_count: number
+  created_at: string
+  updated_at: string
+}
 
 export default function CommunityNoticesPage() {
-  const notices = [
-    {
-      id: 1,
-      title: "2024년 설 연휴 운영시간 변경 안내",
-      date: "2024-02-05",
-      author: "관리자",
-      category: "운영안내",
-      isImportant: true,
-      preview: "설 연휴 기간 중 운영시간이 변경됩니다. 방문 전 확인 부탁드립니다."
-    },
-    {
-      id: 2,
-      title: "신규 해양생물 전시 시작",
-      date: "2024-01-20",
-      author: "전시팀",
-      category: "이벤트",
-      isImportant: false,
-      preview: "희귀 산호와 열대어들을 새롭게 만나보실 수 있습니다."
-    },
-    {
-      id: 3,
-      title: "시설 점검으로 인한 일부 구역 출입 제한",
-      date: "2024-01-15",
-      author: "시설관리팀",
-      category: "긴급공지",
-      isImportant: true,
-      preview: "안전점검으로 인해 일부 구역 출입이 제한됩니다."
-    },
-    {
-      id: 4,
-      title: "가이드 투어 프로그램 확대 운영",
-      date: "2024-01-10",
-      author: "교육팀",
-      category: "프로그램",
-      isImportant: false,
-      preview: "더욱 다양한 시간대에 가이드 투어를 이용하실 수 있습니다."
+  const [notices, setNotices] = useState<Notice[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState("all")
+  const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null)
+
+  useEffect(() => {
+    loadNotices()
+  }, [])
+
+  const loadNotices = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/admin/notices?status=active&limit=20')
+      const result = await response.json()
+
+      if (result.success) {
+        setNotices(result.data)
+      } else {
+        console.error('공지사항 로드 실패:', result.message)
+      }
+    } catch (error) {
+      console.error('공지사항 로드 중 오류:', error)
+    } finally {
+      setLoading(false)
     }
-  ]
+  }
+
+  const getPreview = (content: string) => {
+    return content.length > 100 ? content.substring(0, 100) + '...' : content
+  }
+
+  const filteredNotices = selectedCategory === "all" 
+    ? notices 
+    : notices.filter(notice => notice.category === selectedCategory)
+
+  const categories = [
+    { value: "all", label: "전체", count: notices.length },
+    { value: "운영안내", label: "운영안내", count: notices.filter(n => n.category === "운영안내").length },
+    { value: "이벤트", label: "이벤트", count: notices.filter(n => n.category === "이벤트").length },
+    { value: "긴급공지", label: "긴급공지", count: notices.filter(n => n.category === "긴급공지").length },
+    { value: "프로그램", label: "프로그램", count: notices.filter(n => n.category === "프로그램").length },
+    { value: "일반공지", label: "일반공지", count: notices.filter(n => n.category === "일반공지").length }
+  ].filter(cat => cat.count > 0)
+
+  const handleNoticeClick = async (notice: Notice) => {
+    setSelectedNotice(notice)
+    
+    // 조회수 증가 API 호출 (백그라운드에서)
+    try {
+      await fetch(`/api/admin/notices/${notice.id}`)
+    } catch (error) {
+      console.error('조회수 증가 실패:', error)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -66,76 +102,149 @@ export default function CommunityNoticesPage() {
         </div>
       </section>
 
-      {/* Important Notices */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">중요 공지</h2>
-          <div className="space-y-4">
-            {notices.filter(notice => notice.isImportant).map((notice) => (
-              <Card key={notice.id} className="border-red-200 bg-red-50">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <Bell className="h-5 w-5 text-red-600" />
-                        <span className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">
-                          {notice.category}
-                        </span>
-                        <span className="text-sm text-gray-500">{notice.date}</span>
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{notice.title}</h3>
-                      <p className="text-gray-600 mb-3">{notice.preview}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500">작성자: {notice.author}</span>
-                        <Button variant="outline" size="sm">
-                          자세히 보기 <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+      {/* Notice Content */}
+      {loading ? (
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">공지사항을 불러오는 중...</p>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Category Tabs */}
+            <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+              <div className="flex justify-center mb-8">
+                <TabsList className="h-auto p-1">
+                  {categories.map((category) => (
+                    <TabsTrigger 
+                      key={category.value} 
+                      value={category.value} 
+                      className="flex items-center gap-2 px-4 py-2"
+                    >
+                      {category.label}
+                      <Badge variant="secondary" className="text-xs ml-1">
+                        {category.count}
+                      </Badge>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
 
-      {/* General Notices */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">일반 공지</h2>
-          <div className="space-y-4">
-            {notices.filter(notice => !notice.isImportant).map((notice) => (
-              <Card key={notice.id} className="hover:shadow-md transition-shadow duration-300">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs font-semibold">
-                          {notice.category}
-                        </span>
-                        <span className="text-sm text-gray-500 flex items-center">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          {notice.date}
-                        </span>
-                        <span className="text-sm text-gray-500 flex items-center">
-                          <User className="h-4 w-4 mr-1" />
-                          {notice.author}
-                        </span>
-                      </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{notice.title}</h3>
-                      <p className="text-gray-600 mb-3">{notice.preview}</p>
-                      <Button variant="ghost" size="sm" className="text-blue-600">
-                        자세히 보기 <ChevronRight className="h-4 w-4 ml-1" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+              {categories.map((category) => (
+                <TabsContent key={category.value} value={category.value}>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>
+                        {category.label === "전체" ? "전체 공지사항" : `${category.label} 공지사항`}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {filteredNotices.length === 0 ? (
+                        <div className="text-center py-12 text-gray-500">
+                          {category.label === "전체" ? "공지사항이 없습니다." : `${category.label} 공지사항이 없습니다.`}
+                        </div>
+                      ) : (
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-[100px]">분류</TableHead>
+                              <TableHead>제목</TableHead>
+                              <TableHead className="w-[120px]">작성자</TableHead>
+                              <TableHead className="w-[120px]">작성일</TableHead>
+                              <TableHead className="w-[80px]">조회</TableHead>
+                              <TableHead className="w-[100px]">상세</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredNotices.map((notice) => (
+                              <TableRow key={notice.id} className="hover:bg-gray-50">
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    {notice.is_important && (
+                                      <Bell className="h-4 w-4 text-red-500" />
+                                    )}
+                                    <Badge 
+                                      variant={notice.is_important ? "destructive" : "secondary"}
+                                      className="text-xs"
+                                    >
+                                      {notice.category}
+                                    </Badge>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <div 
+                                        className="font-medium text-gray-900 hover:text-blue-600 cursor-pointer"
+                                        onClick={() => handleNoticeClick(notice)}
+                                      >
+                                        {notice.title}
+                                        {notice.is_important && (
+                                          <span className="ml-2 text-red-500 font-bold text-xs">중요</span>
+                                        )}
+                                      </div>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                                      <DialogHeader>
+                                        <div className="flex items-center gap-3 mb-3">
+                                          {notice.is_important && (
+                                            <Bell className="h-5 w-5 text-red-500" />
+                                          )}
+                                          <Badge 
+                                            variant={notice.is_important ? "destructive" : "secondary"}
+                                          >
+                                            {notice.category}
+                                          </Badge>
+                                          {notice.is_important && (
+                                            <Badge variant="destructive">중요공지</Badge>
+                                          )}
+                                        </div>
+                                        <DialogTitle className="text-xl font-bold text-left">
+                                          {notice.title}
+                                        </DialogTitle>
+                                        <div className="flex items-center gap-4 text-sm text-gray-600 mt-2">
+                                          <span>작성자: {notice.author}</span>
+                                          <span>작성일: {new Date(notice.created_at).toLocaleDateString()}</span>
+                                          <span>조회수: {notice.view_count}</span>
+                                        </div>
+                                      </DialogHeader>
+                                      <div className="mt-6">
+                                        <div className="prose max-w-none">
+                                          <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                                            {notice.content}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </DialogContent>
+                                  </Dialog>
+                                </TableCell>
+                                <TableCell className="text-gray-600">
+                                  {notice.author}
+                                </TableCell>
+                                <TableCell className="text-gray-600">
+                                  {new Date(notice.created_at).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell className="text-gray-600">
+                                  {notice.view_count}
+                                </TableCell>
+                                <TableCell>
+                                  <span className="text-sm text-gray-500">↑ 제목 클릭</span>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              ))}
+            </Tabs>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Notification Settings */}
       <section className="py-16">
