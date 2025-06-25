@@ -36,7 +36,7 @@ export default function PurchasePage() {
   // 빌게이트 JavaScript SDK 로드
   useEffect(() => {
     const script = document.createElement('script')
-    script.src = 'https://tpay.billgate.net/paygate/plugin/gx_web_client.js'
+    script.src = 'https://pay.billgate.net/paygate/plugin/gx_web_client.js'
     script.async = true
     script.onload = () => {
       console.log('빌게이트 SDK 로드 완료')
@@ -50,7 +50,7 @@ export default function PurchasePage() {
 
     return () => {
       // 컴포넌트 언마운트 시 스크립트 제거
-      const existingScript = document.querySelector('script[src="https://tpay.billgate.net/paygate/plugin/gx_web_client.js"]')
+      const existingScript = document.querySelector('script[src="https://pay.billgate.net/paygate/plugin/gx_web_client.js"]')
       if (existingScript) {
         document.head.removeChild(existingScript)
       }
@@ -177,7 +177,7 @@ export default function PurchasePage() {
       // 빌게이트 GX_pay 함수 호출 (팝업으로 결제창 열기)
       if (window.GX_pay) {
         console.log('빌게이트 결제창 호출 중...')
-        window.GX_pay('billgate-payment-form', 'popup', 'https_tpay')
+        window.GX_pay('billgate-payment-form', 'popup', 'https_pay')
       } else {
         throw new Error('빌게이트 결제 시스템이 로드되지 않았습니다.')
       }
