@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Minus, Plus, ArrowLeft } from "lucide-react"
 import { v4 as uuidv4 } from 'uuid'
+
+// 빌게이트 GX_pay 함수 타입 선언
+declare global {
+  interface Window {
+    GX_pay: (formId: string, windowType: string, protocol?: string) => void;
+  }
+}
 
 export default function PurchasePage() {
   const router = useRouter()
@@ -20,10 +27,35 @@ export default function PurchasePage() {
     email: "",
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false)
 
   const adultPrice = 25000
   const childPrice = 18000
   const totalPrice = adultCount * adultPrice + childCount * childPrice
+
+  // 빌게이트 JavaScript SDK 로드
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://tpay.billgate.net/paygate/plugin/gx_web_client.js'
+    script.async = true
+    script.onload = () => {
+      console.log('빌게이트 SDK 로드 완료')
+      setIsScriptLoaded(true)
+    }
+    script.onerror = () => {
+      console.error('빌게이트 SDK 로드 실패')
+    }
+    
+    document.head.appendChild(script)
+
+    return () => {
+      // 컴포넌트 언마운트 시 스크립트 제거
+      const existingScript = document.querySelector('script[src="https://tpay.billgate.net/paygate/plugin/gx_web_client.js"]')
+      if (existingScript) {
+        document.head.removeChild(existingScript)
+      }
+    }
+  }, [])
 
   const handlePurchase = async () => {
     if (totalPrice === 0) {
@@ -33,6 +65,11 @@ export default function PurchasePage() {
 
     if (!customerInfo.name || !customerInfo.phone) {
       alert("이름과 휴대폰 번호를 입력해주세요.")
+      return
+    }
+
+    if (!isScriptLoaded) {
+      alert("결제 시스템을 준비 중입니다. 잠시 후 다시 시도해주세요.")
       return
     }
 
@@ -63,16 +100,16 @@ export default function PurchasePage() {
 
       // 주문 정보를 localStorage에 임시 저장 (결제 완료 후 사용)
       localStorage.setItem('pendingOrder', JSON.stringify({
-        orderId: orderId,
-        customerId: customerInfo.email || customerInfo.phone,
-        ticketType: `대인 ${adultCount}매, 소인 ${childCount}매`,
-        quantity: adultCount + childCount,
-        totalAmount: totalPrice,
-        customerPhone: customerInfo.phone,
-        customerName: customerInfo.name,
-        customerEmail: customerInfo.email,
-        adultCount: adultCount,
-        childCount: childCount
+          orderId: orderId,
+          customerId: customerInfo.email || customerInfo.phone,
+          ticketType: `대인 ${adultCount}매, 소인 ${childCount}매`,
+          quantity: adultCount + childCount,
+          totalAmount: totalPrice,
+          customerPhone: customerInfo.phone,
+          customerName: customerInfo.name,
+          customerEmail: customerInfo.email,
+          adultCount: adultCount,
+          childCount: childCount
       }))
 
       // 빌게이트 결제창 호출
@@ -85,49 +122,73 @@ export default function PurchasePage() {
     }
   }
 
-  // 빌게이트 결제창 호출 함수
+  // 빌게이트 결제창 호출 함수 (올바른 방법)
   const openBillgatePayment = (paymentData: any) => {
-    // 결제 폼 동적 생성
-    const form = document.createElement('form')
-    form.method = 'POST'
-    form.action = paymentData.PAYMENT_URL
-    form.target = '_blank'  // 새 창에서 열기
-    
-    // 결제 파라미터들을 Hidden Input으로 추가
-    const params = {
-      SERVICE_ID: paymentData.SERVICE_ID,
-      SERVICE_TYPE: paymentData.SERVICE_TYPE,
-      SERVICE_CODE: paymentData.SERVICE_CODE,
-      ORDER_ID: paymentData.ORDER_ID,
-      ORDER_DATE: paymentData.ORDER_DATE,
-      AMOUNT: paymentData.AMOUNT,
-      CHECK_SUM: paymentData.CHECK_SUM,
-      RETURN_URL: paymentData.RETURN_URL,
-      CANCEL_FLAG: paymentData.CANCEL_FLAG,
-      ITEM_NAME: `어드벤처 입장권 ${adultCount + childCount}매`,
-      ITEM_CODE: 'ADVENTURE_TICKET',
-      USER_NAME: customerInfo.name,
-      USER_EMAIL: customerInfo.email,
-      USER_PHONE: customerInfo.phone
-    }
+    try {
+      // 기존 결제 폼이 있다면 제거
+      const existingForm = document.getElementById('billgate-payment-form')
+      if (existingForm) {
+        existingForm.remove()
+      }
 
-    Object.entries(params).forEach(([key, value]) => {
-      const input = document.createElement('input')
-      input.type = 'hidden'
-      input.name = key
-      input.value = value || ''
-      form.appendChild(input)
-    })
+      // 결제 폼 생성
+      const form = document.createElement('form')
+      form.id = 'billgate-payment-form'
+      form.name = 'billgate-payment-form'
+      form.method = 'POST'
+      form.action = paymentData.PAYMENT_URL
+      form.style.display = 'none'
+      
+      // 결제 파라미터들을 Hidden Input으로 추가
+      const params = {
+        SERVICE_ID: paymentData.SERVICE_ID,
+        SERVICE_TYPE: paymentData.SERVICE_TYPE,
+        SERVICE_CODE: paymentData.SERVICE_CODE,
+        ORDER_ID: paymentData.ORDER_ID,
+        ORDER_DATE: paymentData.ORDER_DATE,
+        AMOUNT: paymentData.AMOUNT,
+        CHECK_SUM: paymentData.CHECK_SUM,
+        RETURN_URL: paymentData.RETURN_URL,
+        CANCEL_FLAG: paymentData.CANCEL_FLAG,
+        ITEM_NAME: `어드벤처 입장권 ${adultCount + childCount}매`,
+        ITEM_CODE: 'ADVENTURE_TICKET',
+        USER_NAME: customerInfo.name,
+        USER_EMAIL: customerInfo.email || '',
+        USER_PHONE: customerInfo.phone,
+        RESERVED1: '',
+        RESERVED2: '',
+        RESERVED3: ''
+      }
 
-    // 폼을 DOM에 추가하고 submit
-    document.body.appendChild(form)
-    form.submit()
-    document.body.removeChild(form)
+      Object.entries(params).forEach(([key, value]) => {
+        const input = document.createElement('input')
+        input.type = 'hidden'
+        input.name = key
+        input.value = (value || '').toString()
+        form.appendChild(input)
+      })
 
-    // 결제창이 열린 후 로딩 상태 해제
-    setTimeout(() => {
+      // 폼을 DOM에 추가
+      document.body.appendChild(form)
+
+      // 빌게이트 GX_pay 함수 호출 (팝업으로 결제창 열기)
+      if (window.GX_pay) {
+        console.log('빌게이트 결제창 호출 중...')
+        window.GX_pay('billgate-payment-form', 'popup', 'https_tpay')
+      } else {
+        throw new Error('빌게이트 결제 시스템이 로드되지 않았습니다.')
+      }
+
+      // 결제창이 열린 후 로딩 상태 해제
+      setTimeout(() => {
+        setIsLoading(false)
+      }, 2000)
+
+    } catch (error) {
+      console.error('결제창 열기 오류:', error)
+      alert('결제창을 열 수 없습니다. 다시 시도해주세요.')
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   return (
@@ -247,17 +308,27 @@ export default function PurchasePage() {
                   <span>총 결제금액</span>
                   <span className="text-blue-600">{totalPrice.toLocaleString()}원</span>
                 </div>
+                
+                {/* 빌게이트 SDK 로딩 상태 표시 */}
+                {!isScriptLoaded && (
+                  <div className="text-sm text-yellow-600 bg-yellow-50 p-2 rounded">
+                    ⏳ 결제 시스템을 준비 중입니다...
+                  </div>
+                )}
+                
                 <Button 
                   className="w-full" 
                   size="lg" 
                   onClick={handlePurchase} 
-                  disabled={totalPrice === 0 || isLoading}
+                  disabled={totalPrice === 0 || isLoading || !isScriptLoaded}
                 >
                   {isLoading ? (
                     <div className="flex items-center">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                       처리 중...
                     </div>
+                  ) : !isScriptLoaded ? (
+                    '결제 시스템 준비 중...'
                   ) : (
                     '결제하기'
                   )}

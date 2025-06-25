@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
         CANCEL_FLAG: "Y",               // 취소버튼 표시 여부
         
         // 빌게이트 결제창 URL (테스트)
-        PAYMENT_URL: "https://tpay.billgate.net/pay/",
+        PAYMENT_URL: "https://tpay.billgate.net",
         
         // JavaScript 라이브러리 URL (테스트)
         SCRIPT_URL: "https://tpay.billgate.net/paygate/plugin/gx_web_client.js"

@@ -6,180 +6,219 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react'
 
+interface PaymentReturnData {
+  success: boolean;
+  message: string;
+  orderId?: string;
+  approvalNo?: string;
+  transactionNo?: string;
+  qrImageUrl?: string;
+  ticketUrl?: string;
+  error?: string;
+}
+
 /**
  * 빌게이트 결제 완료 후 리턴 페이지 내부 컴포넌트
  */
 function PaymentReturnContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [status, setStatus] = useState<'processing' | 'success' | 'failed'>('processing')
-  const [message, setMessage] = useState('')
-  const [orderInfo, setOrderInfo] = useState<any>(null)
+  const [paymentResult, setPaymentResult] = useState<PaymentReturnData | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const processPaymentResult = async () => {
+    const processPaymentReturn = async () => {
       try {
-        // URL 파라미터에서 빌게이트 응답 데이터 추출
-        const messageParam = searchParams.get('MESSAGE')
-        const responseCode = searchParams.get('RESPONSE_CODE')
-        const orderId = searchParams.get('ORDER_ID')
+        // URL 파라미터에서 빌게이트 결제 결과 데이터 추출
+        const billgateData = {
+          ServiceId: searchParams.get('ServiceId'),
+          PayMethod: searchParams.get('PayMethod'),
+          OrderData: searchParams.get('OrderData'),
+          Amt: searchParams.get('Amt'),
+          Key: searchParams.get('Key'),
+          PlainMsgOk: searchParams.get('PlainMsgOk'),
+          TransactionNo: searchParams.get('TransactionNo'),
+          AuthType: searchParams.get('AuthType'),
+          Iden: searchParams.get('Iden'),
+        };
 
-        console.log('Payment return params:', {
-          messageParam,
-          responseCode,
-          orderId
-        })
+        console.log('빌게이트 결제 리턴 데이터:', billgateData);
 
-        // localStorage에서 주문 정보 가져오기
-        const pendingOrderStr = localStorage.getItem('pendingOrder')
-        if (pendingOrderStr) {
-          const pendingOrder = JSON.parse(pendingOrderStr)
-          setOrderInfo(pendingOrder)
+        // 필수 파라미터 확인
+        if (!billgateData.OrderData || !billgateData.TransactionNo) {
+          throw new Error('필수 결제 데이터가 누락되었습니다.');
         }
 
-        // 결제 실패 또는 취소인 경우
-        if (responseCode && responseCode !== '0000') {
-          setStatus('failed')
-          setMessage('결제가 취소되었거나 실패했습니다.')
-          return
+        // localStorage에서 고객 정보 가져오기
+        const savedOrderData = localStorage.getItem('pendingOrderData');
+        if (!savedOrderData) {
+          throw new Error('고객 정보를 찾을 수 없습니다. 다시 시도해주세요.');
         }
 
-        // MESSAGE 파라미터가 있는 경우 (정상 결제 완료)
-        if (messageParam) {
-          // 빌게이트 승인 API 호출
-          const approvalResponse = await fetch('/api/payment/approve', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: messageParam,
-              orderId: orderId
-            })
-          })
+        const orderData = JSON.parse(savedOrderData);
+        console.log('저장된 주문 데이터:', orderData);
 
-          const approvalResult = await approvalResponse.json()
+        // 빌게이트 승인 처리 API 호출 (실제 빌게이트 서버와 통신)
+        const response = await fetch('/api/payment/approve', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            // 빌게이트 결제창에서 리턴된 데이터
+            ...billgateData,
+            
+            // localStorage에서 가져온 고객 정보
+            customerName: orderData.customerName,
+            customerPhone: orderData.customerPhone,
+            customerEmail: orderData.customerEmail,
+            adultCount: orderData.adultCount || 0,
+            childCount: orderData.childCount || 0,
+          }),
+        });
 
-          if (approvalResult.success) {
-            // 성공 시 실제 주문 생성
-            if (pendingOrderStr) {
-              const pendingOrder = JSON.parse(pendingOrderStr)
-              
-              const orderResponse = await fetch('/api/payment/complete', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  ...pendingOrder,
-                  paymentResult: approvalResult.data
-                })
-              })
-
-              const orderResult = await orderResponse.json()
-
-              if (orderResult.success) {
-                setStatus('success')
-                setMessage('결제가 성공적으로 완료되었습니다.')
-                
-                // localStorage 정리
-                localStorage.removeItem('pendingOrder')
-                
-                // 3초 후 완료 페이지로 이동
-                setTimeout(() => {
-                  router.push(`/purchase/complete?orderId=${orderId}&success=true`)
-                }, 3000)
-              } else {
-                setStatus('failed')
-                setMessage('주문 생성 중 오류가 발생했습니다.')
-              }
-            }
-          } else {
-            setStatus('failed')
-            setMessage(approvalResult.error || '결제 승인 중 오류가 발생했습니다.')
-          }
+        const result = await response.json();
+        
+        if (result.success) {
+          setPaymentResult({
+            success: true,
+            message: result.message,
+            orderId: result.orderId,
+            approvalNo: result.approvalNo,
+            transactionNo: result.transactionNo,
+            qrImageUrl: result.qrImageUrl,
+            ticketUrl: result.ticketUrl
+          });
+          
+          // 처리 완료 후 localStorage 정리
+          localStorage.removeItem('pendingOrderData');
+          
+          console.log('빌게이트 승인 완료:', result);
         } else {
-          // MESSAGE 파라미터가 없는 경우
-          setStatus('failed')
-          setMessage('결제 정보가 올바르지 않습니다.')
+          throw new Error(result.message || '결제 승인 실패');
         }
 
       } catch (error) {
-        console.error('Payment processing error:', error)
-        setStatus('failed')
-        setMessage('결제 처리 중 오류가 발생했습니다.')
+        console.error('결제 승인 처리 중 오류:', error);
+        setPaymentResult({
+          success: false,
+          message: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.',
+          error: error instanceof Error ? error.message : '알 수 없는 오류'
+        });
+      } finally {
+        setLoading(false);
       }
-    }
+    };
 
-    processPaymentResult()
-  }, [searchParams, router])
+    processPaymentReturn();
+  }, [searchParams]);
 
-  const handleRetry = () => {
-    router.push('/purchase')
-  }
-
-  const handleHome = () => {
-    router.push('/')
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center space-y-4 p-6">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+            <p className="text-lg font-medium">결제 승인 처리 중...</p>
+            <p className="text-sm text-gray-600 text-center">
+              빌게이트 서버와 통신하여 결제를 승인하고 있습니다.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            {status === 'processing' && (
-              <Loader2 className="h-16 w-16 text-blue-500 animate-spin" />
-            )}
-            {status === 'success' && (
+            {paymentResult?.success ? (
               <CheckCircle className="h-16 w-16 text-green-500" />
-            )}
-            {status === 'failed' && (
+            ) : (
               <XCircle className="h-16 w-16 text-red-500" />
             )}
           </div>
-          <CardTitle className="text-xl">
-            {status === 'processing' && '결제 처리 중...'}
-            {status === 'success' && '결제 완료'}
-            {status === 'failed' && '결제 실패'}
+          <CardTitle className={`text-2xl ${paymentResult?.success ? 'text-green-700' : 'text-red-700'}`}>
+            {paymentResult?.success ? '결제 완료' : '결제 실패'}
           </CardTitle>
         </CardHeader>
+
         <CardContent className="space-y-4">
           <p className="text-center text-gray-600">
-            {status === 'processing' && '결제 결과를 확인하고 있습니다. 잠시만 기다려주세요.'}
-            {message}
+            {paymentResult?.message}
           </p>
 
-          {orderInfo && (
-            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-              <h3 className="font-semibold">주문 정보</h3>
-              <p className="text-sm">주문번호: {orderInfo.orderId}</p>
-              <p className="text-sm">상품: {orderInfo.ticketType}</p>
-              <p className="text-sm">금액: {orderInfo.totalAmount?.toLocaleString()}원</p>
-              <p className="text-sm">주문자: {orderInfo.customerName}</p>
-            </div>
+          {paymentResult?.success && (
+            <>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <h3 className="font-medium text-green-800 mb-2">📱 입장권 정보</h3>
+                <p className="text-sm text-green-700">
+                  주문번호: <span className="font-mono">{paymentResult.orderId}</span>
+                </p>
+                {paymentResult.approvalNo && (
+                  <p className="text-sm text-green-700">
+                    승인번호: <span className="font-mono">{paymentResult.approvalNo}</span>
+                  </p>
+                )}
+                {paymentResult.transactionNo && (
+                  <p className="text-sm text-green-700">
+                    거래번호: <span className="font-mono">{paymentResult.transactionNo}</span>
+                  </p>
+                )}
+                <p className="text-sm text-green-700 mt-2">
+                  입장 시 QR코드를 제시해주세요.
+                </p>
+              </div>
+
+              {paymentResult.qrImageUrl && (
+                <div className="text-center">
+                  <h3 className="font-medium mb-2">QR 코드</h3>
+                  <img 
+                    src={paymentResult.qrImageUrl} 
+                    alt="입장권 QR 코드" 
+                    className="mx-auto max-w-48 h-auto border rounded-lg"
+                  />
+                </div>
+              )}
+            </>
           )}
 
-          {status === 'success' && (
-            <div className="text-center">
-              <p className="text-sm text-gray-500 mb-4">
-                3초 후 자동으로 완료 페이지로 이동합니다.
+          {paymentResult?.error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <h3 className="font-medium text-red-800 mb-2">❌ 오류 상세</h3>
+              <p className="text-sm text-red-700">{paymentResult.error}</p>
+              <p className="text-xs text-red-600 mt-2">
+                문제가 지속되면 고객센터로 문의해주세요.
               </p>
-              <Button onClick={() => router.push(`/purchase/complete?orderId=${orderInfo?.orderId}&success=true`)}>
-                완료 페이지로 이동
-              </Button>
             </div>
           )}
 
-          {status === 'failed' && (
-            <div className="flex space-x-2">
-              <Button variant="outline" onClick={handleHome} className="flex-1">
-                메인으로
+          <div className="flex gap-3 pt-4">
+            <Button 
+              onClick={() => router.push('/')}
+              variant="outline"
+              className="flex-1"
+            >
+              홈으로
+            </Button>
+            {paymentResult?.success ? (
+              <Button 
+                onClick={() => router.push('/reservation-check')}
+                className="flex-1"
+              >
+                예약 확인
               </Button>
-              <Button onClick={handleRetry} className="flex-1">
+            ) : (
+              <Button 
+                onClick={() => router.push('/purchase')}
+                className="flex-1"
+              >
                 다시 시도
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -199,13 +238,8 @@ export default function PaymentReturnPage() {
             <div className="flex justify-center mb-4">
               <Loader2 className="h-16 w-16 text-blue-500 animate-spin" />
             </div>
-            <CardTitle className="text-xl">결제 처리 중...</CardTitle>
+            <CardTitle className="text-xl">페이지 로딩 중...</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-center text-gray-600">
-              결제 결과를 확인하고 있습니다. 잠시만 기다려주세요.
-            </p>
-          </CardContent>
         </Card>
       </div>
     }>
