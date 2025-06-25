@@ -86,7 +86,7 @@ export default function PurchasePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          serviceId: 'M2103135',  // 테스트 서비스 ID
+          serviceId: process.env.NEXT_PUBLIC_BILLGATE_SERVICE_ID,
           orderId: orderId,
           amount: totalPrice
         })

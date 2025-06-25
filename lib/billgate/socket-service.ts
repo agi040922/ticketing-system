@@ -40,7 +40,7 @@ export class BillgateSocketService {
   private readonly timeout: number;
 
   constructor(
-    host: string = process.env.BILLGATE_API_HOST || 'tapi.billgate.net',
+    host: string = process.env.BILLGATE_API_HOST || 'api.billgate.net',
     port: number = parseInt(process.env.BILLGATE_API_PORT || '30900'),
     timeout: number = 30000
   ) {
