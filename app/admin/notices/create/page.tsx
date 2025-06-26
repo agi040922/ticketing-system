@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ImageUpload } from "@/components/image-upload"
 import { ArrowLeft, Save, Eye } from "lucide-react"
 
 export default function CreateNoticePage() {
@@ -22,6 +23,7 @@ export default function CreateNoticePage() {
     isImportant: false,
     author: "관리자"
   })
+  const [images, setImages] = useState<any[]>([])
   const [preview, setPreview] = useState(false)
 
   const categories = [
@@ -48,7 +50,10 @@ export default function CreateNoticePage() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          images
+        })
       })
 
       const result = await response.json()
@@ -188,6 +193,17 @@ export default function CreateNoticePage() {
                     </Label>
                   </div>
 
+                  {/* 이미지 업로드 */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">이미지 첨부 (선택사항)</Label>
+                    <ImageUpload
+                      images={images}
+                      onImagesChange={setImages}
+                      maxImages={5}
+                      maxSizeInMB={5}
+                    />
+                  </div>
+
                   {/* 버튼 */}
                   <div className="flex gap-3">
                     <Button
@@ -240,6 +256,21 @@ export default function CreateNoticePage() {
                       <div className="whitespace-pre-wrap text-gray-700">
                         {formData.content || '내용을 입력하세요'}
                       </div>
+                      {images.length > 0 && (
+                        <div className="mt-4">
+                          <h4 className="text-sm font-medium text-gray-900 mb-2">첨부 이미지</h4>
+                          <div className="grid grid-cols-2 gap-2">
+                            {images.map((image) => (
+                              <img
+                                key={image.id}
+                                src={image.url}
+                                alt={image.alt || image.filename}
+                                className="w-full h-20 object-cover rounded border"
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="text-sm text-gray-500 border-t pt-4">
                       작성자: {formData.author} | 작성일: {new Date().toLocaleDateString()}

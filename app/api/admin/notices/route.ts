@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { title, content, category, isImportant, author } = body
+    const { title, content, category, isImportant, author, images } = body
 
     // 필수 필드 검증
     if (!title || !content) {
@@ -103,7 +103,8 @@ export async function POST(request: NextRequest) {
           category: category || '일반공지',
           is_important: isImportant || false,
           author: author || '관리자',
-          status: 'active'
+          status: 'active',
+          images: images || []
         }
       ])
       .select()

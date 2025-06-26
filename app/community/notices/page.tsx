@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { NavigationHeader } from "@/components/navigation-header"
+import { ImageGallery } from "@/components/image-gallery"
 import { ArrowLeft, Bell, Calendar, User, ChevronRight, Loader2, Eye } from "lucide-react"
 
 interface Notice {
@@ -22,6 +23,7 @@ interface Notice {
   view_count: number
   created_at: string
   updated_at: string
+  images?: any[]
 }
 
 export default function CommunityNoticesPage() {
@@ -216,6 +218,13 @@ export default function CommunityNoticesPage() {
                                             {notice.content}
                                           </div>
                                         </div>
+                                        
+                                        {/* 이미지 갤러리 */}
+                                        {notice.images && notice.images.length > 0 && (
+                                          <div className="mt-6 pt-6 border-t">
+                                            <ImageGallery images={notice.images} />
+                                          </div>
+                                        )}
                                       </div>
                                     </DialogContent>
                                   </Dialog>

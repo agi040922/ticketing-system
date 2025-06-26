@@ -1,12 +1,37 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MapPin, Clock, Phone, Ticket, Calendar, TreePine, Zap, Star } from "lucide-react"
 import { NavigationHeader } from "@/components/navigation-header"
 import { ImageCarousel } from "@/components/image-carousel"
+import { NoticePopup, shouldShowNoticePopup } from "@/components/notice-popup"
 import Image from "next/image"
+import { useEffect, useState } from "react"
 
 export default function HomePage() {
+  const [showNoticePopup, setShowNoticePopup] = useState(false)
+  const [importantNotices, setImportantNotices] = useState([])
+
+  // 중요 공지사항 조회
+  useEffect(() => {
+    const fetchImportantNotices = async () => {
+      try {
+        const response = await fetch('/api/notices/important')
+        const data = await response.json()
+        
+        if (data.notices && data.notices.length > 0 && shouldShowNoticePopup()) {
+          setImportantNotices(data.notices)
+          setShowNoticePopup(true)
+        }
+      } catch (error) {
+        console.error('중요 공지사항 조회 실패:', error)
+      }
+    }
+
+    fetchImportantNotices()
+  }, [])
   const carouselImages = [
     {
       src: "/배경.jpg",
@@ -38,6 +63,13 @@ export default function HomePage() {
     <div className="min-h-screen bg-white">
       {/* Navigation Header */}
       <NavigationHeader />
+
+      {/* 중요 공지사항 팝업 */}
+      <NoticePopup
+        isOpen={showNoticePopup}
+        onClose={() => setShowNoticePopup(false)}
+        notices={importantNotices}
+      />
 
       {/* Hero Section with Carousel */}
       <section className="py-8 bg-gradient-to-b from-green-50 to-white">

@@ -61,7 +61,7 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
-    const { title, content, category, isImportant, author, status } = body
+    const { title, content, category, isImportant, author, status, images } = body
 
     // 필수 필드 검증
     if (!title || !content) {
@@ -79,7 +79,8 @@ export async function PUT(
         category: category || '일반공지',
         is_important: isImportant || false,
         author: author || '관리자',
-        status: status || 'active'
+        status: status || 'active',
+        images: images || []
       })
       .eq('id', id)
       .select()

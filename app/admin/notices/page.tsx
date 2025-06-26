@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { ArrowLeft, Plus, Eye, Edit, Trash2, Search } from "lucide-react"
+import { ArrowLeft, Plus, Eye, Edit, Trash2, Search, Image as ImageIcon } from "lucide-react"
 
 interface Notice {
   id: number
@@ -23,6 +23,7 @@ interface Notice {
   view_count: number
   created_at: string
   updated_at: string
+  images?: any[]
 }
 
 export default function AdminNoticesPage() {
@@ -205,6 +206,12 @@ export default function AdminNoticesPage() {
                             <Badge variant="destructive" className="text-xs">
                               중요
                             </Badge>
+                          )}
+                          {notice.images && notice.images.length > 0 && (
+                            <div className="flex items-center text-xs text-gray-500">
+                              <ImageIcon className="h-3 w-3 mr-1" />
+                              {notice.images.length}
+                            </div>
                           )}
                           <span className="font-medium">{notice.title}</span>
                         </div>
