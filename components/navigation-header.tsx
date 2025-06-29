@@ -3,11 +3,22 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Ticket, ChevronDown, Menu, X } from "lucide-react"
+import { Ticket, ChevronDown, Menu, X, User, LogOut, Settings, ShoppingBag } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function NavigationHeader() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user, profile, signOut, loading } = useAuth()
 
   const menuItems = [
     {
@@ -51,6 +62,14 @@ export function NavigationHeader() {
       ],
     },
   ]
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+    } catch (error) {
+      console.error('로그아웃 실패:', error)
+    }
+  }
 
   return (
     <header className="bg-white shadow-sm border-b relative z-50">
@@ -111,6 +130,77 @@ export function NavigationHeader() {
               ))}
             </nav>
 
+            {/* User Menu / Login Button */}
+            <div className="hidden lg:flex items-center space-x-4">
+              {loading ? (
+                <div className="h-8 w-8 animate-pulse bg-gray-200 rounded-full" />
+              ) : user && profile ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center space-x-2 p-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={profile.avatar_url || ''} />
+                        <AvatarFallback>
+                          {profile.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">{profile.name}</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <div className="px-3 py-2 border-b">
+                      <p className="text-sm font-medium">{profile.name}</p>
+                      <p className="text-xs text-gray-500">{profile.email}</p>
+                    </div>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile" className="flex items-center cursor-pointer">
+                        <User className="h-4 w-4 mr-2" />
+                        내 정보
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile/tickets" className="flex items-center cursor-pointer">
+                        <Ticket className="h-4 w-4 mr-2" />
+                        내 티켓
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/profile/coupons" className="flex items-center cursor-pointer">
+                        <ShoppingBag className="h-4 w-4 mr-2" />
+                        내 쿠폰
+                      </Link>
+                    </DropdownMenuItem>
+                    {profile.role === 'admin' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link href="/admin" className="flex items-center cursor-pointer">
+                            <Settings className="h-4 w-4 mr-2" />
+                            관리자 페이지
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="flex items-center cursor-pointer">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      로그아웃
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" asChild>
+                    <Link href="/auth/login">로그인</Link>
+                  </Button>
+                  <Button asChild>
+                    <Link href="/auth/register">회원가입</Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+
             {/* Mobile Menu Button */}
             <div className="lg:hidden">
               <button
@@ -132,7 +222,7 @@ export function NavigationHeader() {
               <div key={menu.title}>
                 <button
                   onClick={() => setActiveDropdown(activeDropdown === menu.title ? null : menu.title)}
-                  className="flex items-center justify-between w-full text-left text-gray-700 font-medium py-2"
+                  className="flex items-center justify-between w-full text-left text-gray-700 font-medium py-2 px-4"
                 >
                   {menu.title}
                   <ChevronDown
@@ -145,7 +235,7 @@ export function NavigationHeader() {
                       <Link
                         key={item.name}
                         href={item.href}
-                        className="block text-sm text-gray-600 hover:text-blue-600 py-1"
+                        className="block text-sm text-gray-600 hover:text-blue-600 py-1 px-4"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         {item.name}
@@ -155,6 +245,84 @@ export function NavigationHeader() {
                 )}
               </div>
             ))}
+            
+            {/* Mobile User Menu */}
+            <div className="border-t border-gray-200 pt-4 px-4">
+              {loading ? (
+                <div className="h-8 w-8 animate-pulse bg-gray-200 rounded-full" />
+              ) : user && profile ? (
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-3 pb-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={profile.avatar_url || ''} />
+                      <AvatarFallback>
+                        {profile.name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">{profile.name}</p>
+                      <p className="text-xs text-gray-500">{profile.email}</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/profile"
+                    className="block text-sm text-gray-600 hover:text-blue-600 py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    내 정보
+                  </Link>
+                  <Link
+                    href="/profile/tickets"
+                    className="block text-sm text-gray-600 hover:text-blue-600 py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    내 티켓
+                  </Link>
+                  <Link
+                    href="/profile/coupons"
+                    className="block text-sm text-gray-600 hover:text-blue-600 py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    내 쿠폰
+                  </Link>
+                  {profile.role === 'admin' && (
+                    <Link
+                      href="/admin"
+                      className="block text-sm text-gray-600 hover:text-blue-600 py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      관리자 페이지
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      handleSignOut()
+                      setMobileMenuOpen(false)
+                    }}
+                    className="text-left text-sm text-gray-600 hover:text-blue-600 py-2 w-full"
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Link
+                    href="/auth/login"
+                    className="block text-sm text-gray-600 hover:text-blue-600 py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    로그인
+                  </Link>
+                  <Link
+                    href="/auth/register"
+                    className="block text-sm text-gray-600 hover:text-blue-600 py-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    회원가입
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

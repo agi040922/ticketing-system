@@ -1,0 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+-DB관련 접근을 해야하면 docs/db.md가 현재 db구조이니까 참고해서 해줘
+-만약 변경이 생긴다면 sql로 어떻게 해야하는지 가이드를 줘.
+
+-db를 수정한다면 docs/db.md를 그에 맞게 수정해줘.

@@ -4,10 +4,14 @@
 
 | 테이블명 | 설명 | 주요 기능 |
 |----------|------|-----------|
-| **orders** | 주문 정보 | 고객 주문 관리, 결제 정보 |
-| **order_items** | 주문 상품 정보 | 티켓 정보, 사용 상태 관리 |
+| **orders** | 주문 정보 | 고객 주문 관리, 결제 정보, 쿠폰 할인 |
+| **order_items** | 주문 상품 정보 | 티켓 정보, 사용 상태 관리, QR코드 |
 | **scan_logs** | 스캔 기록 | 티켓 스캔 로그 관리 |
 | **notices** | 공지사항 | 공지사항 관리, 이미지 지원 |
+| **profiles** ✨ | 사용자 프로필 | 회원 정보, 권한 관리 |
+| **coupons** ✨ | 쿠폰 마스터 | 쿠폰 정보, 할인 정책 |
+| **user_coupons** ✨ | 사용자별 쿠폰 | 쿠폰 소유/사용 내역 |
+| **user_activities** ✨ | 사용자 활동 | 로그인, 구매, 사용 기록 |
 
 ---
 
@@ -33,6 +37,10 @@
 | `cancel_amount` | integer | YES | null | 취소 금액 |
 | `remaining_amount` | integer | YES | null | 잔여 금액 |
 | `cancelled_at` | timestamp without time zone | YES | null | 취소 시간 |
+| `user_id` | uuid | YES | null | 사용자 ID (profiles.id 참조) ✨ |
+| `coupon_id` | uuid | YES | null | 사용된 쿠폰 ID (coupons.id 참조) ✨ |
+| `discount_amount` | integer | YES | 0 | 쿠폰 할인 금액 ✨ |
+| `original_amount` | integer | YES | null | 할인 전 원래 금액 ✨ |
 
 ### 2. **order_items** 테이블 (주문 상품 정보)
 
@@ -46,6 +54,8 @@
 | `status` | text | YES | 'active' | 티켓 상태 (active/used) |
 | `used_at` | timestamp with time zone | YES | null | 사용 시간 |
 | `created_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 생성 시간 |
+| `unique_code` | varchar(100) | YES | null | 고유 티켓 코드 (QR코드용) ✨ |
+| `qr_image_url` | text | YES | null | QR코드 이미지 URL ✨ |
 
 ### 3. **scan_logs** 테이블 (스캔 기록)
 
@@ -74,20 +84,110 @@
 | `created_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 생성 시간 |
 | `updated_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 수정 시간 |
 
+### 5. **profiles** 테이블 (사용자 프로필) ✨ **NEW**
+
+| 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
+|--------|-------------|-----------|--------|------|
+| `id` | uuid | NO | auth.uid() | 사용자 ID (Primary Key, auth.users 참조) |
+| `email` | varchar(255) | NO | null | 이메일 (auth.users와 동기화) |
+| `name` | varchar(100) | NO | null | 사용자 이름 |
+| `phone` | varchar(20) | YES | null | 전화번호 |
+| `birth_date` | date | YES | null | 생년월일 |
+| `gender` | varchar(10) | YES | null | 성별 (male/female/other) |
+| `role` | varchar(20) | NO | 'user' | 권한 (user/admin/manager) |
+| `avatar_url` | text | YES | null | 프로필 이미지 URL |
+| `marketing_agreed` | boolean | NO | false | 마케팅 수신 동의 |
+| `created_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 생성일 |
+| `updated_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 수정일 |
+
+### 6. **coupons** 테이블 (쿠폰 마스터) ✨ **NEW**
+
+| 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
+|--------|-------------|-----------|--------|------|
+| `id` | uuid | NO | gen_random_uuid() | 쿠폰 ID (Primary Key) |
+| `name` | varchar(100) | NO | null | 쿠폰명 |
+| `code` | varchar(50) | NO | null | 쿠폰 코드 (UNIQUE) |
+| `type` | varchar(20) | NO | 'discount' | 타입 (discount/free_ticket/extra_time) |
+| `discount_type` | varchar(20) | YES | null | 할인 타입 (percentage/fixed) |
+| `discount_value` | integer | YES | null | 할인값 (percentage: %, fixed: 원) |
+| `min_purchase_amount` | integer | YES | 0 | 최소 주문 금액 |
+| `max_discount_amount` | integer | YES | null | 최대 할인 금액 |
+| `usage_limit` | integer | YES | null | 사용 한도 (null=무제한) |
+| `used_count` | integer | NO | 0 | 사용 횟수 |
+| `valid_from` | timestamp with time zone | NO | null | 유효 시작일 |
+| `valid_until` | timestamp with time zone | NO | null | 유효 종료일 |
+| `status` | varchar(20) | NO | 'active' | 상태 (active/inactive/expired) |
+| `description` | text | YES | null | 쿠폰 설명 |
+| `created_by` | uuid | YES | null | 생성자 (profiles.id 참조) |
+| `created_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 생성일 |
+
+### 7. **user_coupons** 테이블 (사용자별 쿠폰) ✨ **NEW**
+
+| 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
+|--------|-------------|-----------|--------|------|
+| `id` | uuid | NO | gen_random_uuid() | ID (Primary Key) |
+| `user_id` | uuid | NO | null | 사용자 ID (profiles.id 참조) |
+| `coupon_id` | uuid | NO | null | 쿠폰 ID (coupons.id 참조) |
+| `order_id` | text | YES | null | 사용된 주문 ID (orders.id 참조) |
+| `status` | varchar(20) | NO | 'available' | 상태 (available/used/expired) |
+| `used_at` | timestamp with time zone | YES | null | 사용일 |
+| `received_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 받은 날짜 |
+| `expires_at` | timestamp with time zone | YES | null | 만료일 |
+
+### 8. **user_activities** 테이블 (사용자 활동 로그) ✨ **NEW**
+
+| 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
+|--------|-------------|-----------|--------|------|
+| `id` | uuid | NO | gen_random_uuid() | ID (Primary Key) |
+| `user_id` | uuid | NO | null | 사용자 ID (profiles.id 참조) |
+| `activity_type` | varchar(50) | NO | null | 활동 타입 (login/purchase/coupon_use) |
+| `description` | text | YES | null | 활동 설명 |
+| `metadata` | jsonb | YES | '{}' | 추가 정보 (JSON) |
+| `ip_address` | inet | YES | null | IP 주소 |
+| `user_agent` | text | YES | null | 사용자 에이전트 |
+| `created_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 생성일 |
+
 ---
 
 ## 🔗 테이블 관계
 
 ```
-orders (1) ────── (N) order_items
-   │
-   └─ id ──────── order_id
+📱 사용자 시스템
+auth.users (1) ────── (1) profiles
+     │
+     └─ 사용자 인증 ──── 프로필 정보
 
+👤 사용자 - 주문 관계
+profiles (1) ────── (N) orders
+    │                    │
+    └─ user_id ───────── user_id
+
+🎫 주문 - 티켓 관계  
+orders (1) ────── (N) order_items
+   │                    │
+   └─ id ──────────── order_id
+
+🔍 티켓 - 스캔 관계
 order_items ──── scan_logs
    │                │
    └─ 티켓 정보 ──── 스캔 기록
 
-notices (독립적)
+🎟️ 쿠폰 시스템
+coupons (1) ────── (N) user_coupons ────── (1) profiles
+    │                      │                    │
+    └─ 쿠폰 마스터 ──── 사용자별 쿠폰 ──── 사용자
+
+orders ────── coupons
+   │              │
+   └─ coupon_id ─┘
+
+📝 활동 로그
+profiles (1) ────── (N) user_activities
+    │                    │
+    └─ user_id ───────── user_id
+
+📢 공지사항 (독립적)
+notices
    └─ 공지사항 관리
 ```
 
@@ -116,6 +216,29 @@ notices (독립적)
 - `idx_notices_created_at` : created_at DESC
 - `idx_notices_images` : images (GIN 인덱스)
 
+### **profiles** 테이블 ✨ **NEW**
+- `idx_profiles_email` : email
+- `idx_profiles_role` : role
+- `idx_profiles_created_at` : created_at DESC
+
+### **coupons** 테이블 ✨ **NEW**
+- `idx_coupons_code` : code (UNIQUE)
+- `idx_coupons_status` : status
+- `idx_coupons_valid_until` : valid_until
+- `idx_coupons_type` : type
+
+### **user_coupons** 테이블 ✨ **NEW**
+- `idx_user_coupons_user_id` : user_id
+- `idx_user_coupons_coupon_id` : coupon_id
+- `idx_user_coupons_status` : status
+- `idx_user_coupons_expires_at` : expires_at
+
+### **user_activities** 테이블 ✨ **NEW**
+- `idx_user_activities_user_id` : user_id
+- `idx_user_activities_type` : activity_type
+- `idx_user_activities_created_at` : created_at DESC
+- `idx_user_activities_metadata` : metadata (GIN 인덱스)
+
 ---
 
 ## 🚀 주요 기능
@@ -139,9 +262,35 @@ notices (독립적)
 - 카테고리별 분류
 - 조회수 추적
 
+### 👤 **사용자 시스템** ✨ **NEW**
+- Supabase Auth + Google OAuth 로그인
+- 사용자 프로필 관리
+- 역할 기반 권한 제어 (user/admin/manager)
+- 마이페이지 (티켓 내역, 쿠폰 관리)
+
+### 🎟️ **쿠폰 시스템** ✨ **NEW**
+- 할인 쿠폰 (정율/정액 할인)
+- 무료 이용권 쿠폰
+- 사용자별 쿠폰 관리
+- 쿠폰 유효기간 및 사용 한도 관리
+
+### 📊 **사용자 활동 추적** ✨ **NEW**
+- 로그인/구매/쿠폰 사용 기록
+- IP 주소 및 사용자 에이전트 로그
+- JSON 메타데이터 저장
+- 관리자 통계 및 분석
+
 ---
 
 ## 🔧 최근 업데이트
+
+### 2024.12.29 - 사용자 시스템 구현 ✨ **NEW**
+- ✅ **profiles** 테이블 생성 (사용자 프로필)
+- ✅ **coupons** 테이블 생성 (쿠폰 마스터)
+- ✅ **user_coupons** 테이블 생성 (사용자별 쿠폰)
+- ✅ **user_activities** 테이블 생성 (활동 로그)
+- ✅ **orders** 테이블 확장 (사용자 연결, 쿠폰 할인)
+- ✅ **order_items** 테이블 확장 (QR 코드 정보)
 
 ### 2024.12 - 공지사항 시스템 추가
 - ✅ **notices** 테이블 생성
