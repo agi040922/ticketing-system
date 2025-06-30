@@ -9,27 +9,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/auth-context'
-import { Chrome, Mail, ArrowLeft } from 'lucide-react'
+import { Mail, ArrowLeft } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const { signInWithGoogle, signInWithEmail } = useAuth()
+  const { signInWithEmail } = useAuth()
   const router = useRouter()
-
-  const handleGoogleLogin = async () => {
-    try {
-      setLoading(true)
-      setError('')
-      await signInWithGoogle()
-    } catch (error: any) {
-      setError(error.message || '구글 로그인에 실패했습니다.')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -81,27 +69,7 @@ export default function LoginPage() {
               </Alert>
             )}
 
-            {/* 구글 로그인 */}
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={handleGoogleLogin}
-              disabled={loading}
-            >
-              <Chrome className="h-5 w-5 mr-2" />
-              Google로 계속하기
-            </Button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">또는</span>
-              </div>
-            </div>
 
             {/* 이메일 로그인 */}
             <form onSubmit={handleEmailLogin} className="space-y-4">

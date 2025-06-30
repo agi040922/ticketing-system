@@ -1,23 +1,114 @@
-# 🗄️ 데이터베이스 구조 (최신 상태)
+# 🗄️ 데이터베이스 구조 (Users 테이블 적용)
 
 ## 📊 전체 테이블 개요
 
 | 테이블명 | 설명 | 주요 기능 |
 |----------|------|-----------|
+| **users** ✨ | 사용자 정보 | 회원 정보, 권한 관리 (profiles 대체) |
 | **orders** | 주문 정보 | 고객 주문 관리, 결제 정보, 쿠폰 할인 |
 | **order_items** | 주문 상품 정보 | 티켓 정보, 사용 상태 관리, QR코드 |
 | **scan_logs** | 스캔 기록 | 티켓 스캔 로그 관리 |
 | **notices** | 공지사항 | 공지사항 관리, 이미지 지원 |
-| **profiles** ✨ | 사용자 프로필 | 회원 정보, 권한 관리 |
 | **coupons** ✨ | 쿠폰 마스터 | 쿠폰 정보, 할인 정책 |
 | **user_coupons** ✨ | 사용자별 쿠폰 | 쿠폰 소유/사용 내역 |
 | **user_activities** ✨ | 사용자 활동 | 로그인, 구매, 사용 기록 |
 
 ---
 
+## ✅ **Users 테이블 신규 적용 (2024년 최신)**
+
+### **🔥 변경 사항: profiles → users 테이블 교체**
+
+기존 복잡한 profiles 테이블을 단순하고 효율적인 users 테이블로 완전 교체했습니다.
+
+**적용 스크립트:** `docs/create_simple_users_table.sql`
+
+### **🎯 새로운 Users 테이블 특징:**
+
+#### **1. 단순한 구조 (복잡한 기능 제거)**
+```sql
+-- ✅ 트리거, RLS 등 복잡한 기능 제거
+-- ✅ Auth Context에서 직접 관리
+-- ✅ 개발 환경에 최적화된 단순한 권한 설정
+```
+
+#### **2. 직접 데이터 관리**
+```sql
+-- ✅ 회원가입 시 Auth Context에서 직접 users 테이블에 생성
+-- ✅ 로그인 시 자동으로 users 데이터 조회/생성
+-- ✅ 복잡한 트리거 없이 JavaScript에서 관리
+```
+
+#### **3. 기본 권한 설정**
+```sql
+-- ✅ RLS 비활성화 (개발 환경)
+-- ✅ authenticated 역할: 모든 권한
+-- ✅ anon 역할: SELECT만 허용
+```
+
+#### **4. 최적화된 인덱스**
+```sql
+-- ✅ 성능 최적화 인덱스:
+- idx_users_email        : 이메일 검색
+- idx_users_role         : 권한별 조회  
+- idx_users_created_at   : 생성일 정렬
+```
+
+#### **5. 외래키 관계 유지**
+```sql
+-- ✅ 다른 테이블과의 연결 유지:
+- orders.user_id → users.id
+- user_coupons.user_id → users.id
+- user_activities.user_id → users.id
+```
+
+### **🔧 적용 방법:**
+
+**1단계: 테이블 교체 실행**
+```sql
+-- Supabase SQL Editor에서 실행:
+-- docs/create_simple_users_table.sql
+```
+
+**2단계: Auth Context 업데이트 완료**
+- `contexts/auth-context.tsx`: profiles → users로 변경
+- 회원가입/로그인 시 users 테이블 직접 관리
+- 복잡한 트리거 없이 JavaScript에서 처리
+
+**3단계: 테스트 페이지 업데이트**
+- `/debug/profiles-test` → 실제로는 users 테이블 테스트
+- 모든 CRUD 기능 정상 작동 확인
+
+### **📊 예상 결과:**
+- ✅ Auth 사용자 수 = Users 수 (완벽 매칭)
+- ✅ 복잡한 RLS/트리거 제거로 단순화
+- ✅ Auth Context에서 완전한 제어
+- ✅ 개발 환경에 최적화
+
+---
+
 ## 📝 테이블별 상세 구조
 
-### 1. **orders** 테이블 (주문 정보)
+### 1. **users** 테이블 (사용자 정보) ✨ **NEW**
+
+| 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
+|--------|-------------|-----------|--------|------|
+| `id` | uuid | NO | auth.users.id | 사용자 ID (Primary Key, auth.users 참조) |
+| `email` | text | NO | unique | 이메일 (auth.users와 동기화) |
+| `name` | text | NO | null | 사용자 이름 |
+| `phone` | text | YES | null | 전화번호 |
+| `role` | text | NO | 'user' | 권한 (admin/manager/user) |
+| `marketing_agreed` | boolean | NO | false | 마케팅 수신 동의 |
+| `created_at` | timestamp with time zone | YES | NOW() | 생성일 |
+| `updated_at` | timestamp with time zone | YES | NOW() | 수정일 |
+
+**주요 특징:**
+- Supabase Auth와 1:1 매칭
+- 단순한 필드 구성 (birth_date, gender, avatar_url 등 제거)
+- 필수 필드만 유지하여 복잡성 최소화
+- Auth Context에서 직접 관리
+
+### 2. **orders** 테이블 (주문 정보)
 
 | 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
 |--------|-------------|-----------|--------|------|
@@ -37,12 +128,12 @@
 | `cancel_amount` | integer | YES | null | 취소 금액 |
 | `remaining_amount` | integer | YES | null | 잔여 금액 |
 | `cancelled_at` | timestamp without time zone | YES | null | 취소 시간 |
-| `user_id` | uuid | YES | null | 사용자 ID (profiles.id 참조) ✨ |
+| `user_id` | uuid | YES | null | 사용자 ID (**users.id 참조**) ✨ |
 | `coupon_id` | uuid | YES | null | 사용된 쿠폰 ID (coupons.id 참조) ✨ |
 | `discount_amount` | integer | YES | 0 | 쿠폰 할인 금액 ✨ |
 | `original_amount` | integer | YES | null | 할인 전 원래 금액 ✨ |
 
-### 2. **order_items** 테이블 (주문 상품 정보)
+### 3. **order_items** 테이블 (주문 상품 정보)
 
 | 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
 |--------|-------------|-----------|--------|------|
@@ -57,7 +148,7 @@
 | `unique_code` | varchar(100) | YES | null | 고유 티켓 코드 (QR코드용) ✨ |
 | `qr_image_url` | text | YES | null | QR코드 이미지 URL ✨ |
 
-### 3. **scan_logs** 테이블 (스캔 기록)
+### 4. **scan_logs** 테이블 (스캔 기록)
 
 | 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
 |--------|-------------|-----------|--------|------|
@@ -68,7 +159,7 @@
 | `scan_location` | text | YES | null | 스캔 위치 |
 | `scanned_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 스캔 시간 |
 
-### 4. **notices** 테이블 (공지사항) ✨ **NEW**
+### 5. **notices** 테이블 (공지사항)
 
 | 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
 |--------|-------------|-----------|--------|------|
@@ -84,23 +175,7 @@
 | `created_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 생성 시간 |
 | `updated_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 수정 시간 |
 
-### 5. **profiles** 테이블 (사용자 프로필) ✨ **NEW**
-
-| 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
-|--------|-------------|-----------|--------|------|
-| `id` | uuid | NO | auth.uid() | 사용자 ID (Primary Key, auth.users 참조) |
-| `email` | varchar(255) | NO | null | 이메일 (auth.users와 동기화) |
-| `name` | varchar(100) | NO | null | 사용자 이름 |
-| `phone` | varchar(20) | YES | null | 전화번호 |
-| `birth_date` | date | YES | null | 생년월일 |
-| `gender` | varchar(10) | YES | null | 성별 (male/female/other) |
-| `role` | varchar(20) | NO | 'user' | 권한 (user/admin/manager) |
-| `avatar_url` | text | YES | null | 프로필 이미지 URL |
-| `marketing_agreed` | boolean | NO | false | 마케팅 수신 동의 |
-| `created_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 생성일 |
-| `updated_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 수정일 |
-
-### 6. **coupons** 테이블 (쿠폰 마스터) ✨ **NEW**
+### 6. **coupons** 테이블 (쿠폰 마스터)
 
 | 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
 |--------|-------------|-----------|--------|------|
@@ -118,188 +193,93 @@
 | `valid_until` | timestamp with time zone | NO | null | 유효 종료일 |
 | `status` | varchar(20) | NO | 'active' | 상태 (active/inactive/expired) |
 | `description` | text | YES | null | 쿠폰 설명 |
-| `created_by` | uuid | YES | null | 생성자 (profiles.id 참조) |
+| `created_by` | uuid | YES | null | 생성자 ID (**users.id 참조**) ✨ |
 | `created_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 생성일 |
+| `updated_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 수정일 |
 
-### 7. **user_coupons** 테이블 (사용자별 쿠폰) ✨ **NEW**
+### 7. **user_coupons** 테이블 (사용자별 쿠폰)
 
 | 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
 |--------|-------------|-----------|--------|------|
-| `id` | uuid | NO | gen_random_uuid() | ID (Primary Key) |
-| `user_id` | uuid | NO | null | 사용자 ID (profiles.id 참조) |
+| `id` | uuid | NO | gen_random_uuid() | 사용자 쿠폰 ID (Primary Key) |
+| `user_id` | uuid | NO | null | 사용자 ID (**users.id 참조**) ✨ |
 | `coupon_id` | uuid | NO | null | 쿠폰 ID (coupons.id 참조) |
-| `order_id` | text | YES | null | 사용된 주문 ID (orders.id 참조) |
 | `status` | varchar(20) | NO | 'available' | 상태 (available/used/expired) |
-| `used_at` | timestamp with time zone | YES | null | 사용일 |
-| `received_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 받은 날짜 |
-| `expires_at` | timestamp with time zone | YES | null | 만료일 |
+| `used_order_id` | text | YES | null | 사용된 주문 ID (orders.id 참조) |
+| `used_at` | timestamp with time zone | YES | null | 사용 시간 |
+| `obtained_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 획득 시간 |
+| `expires_at` | timestamp with time zone | YES | null | 만료 시간 |
 
-### 8. **user_activities** 테이블 (사용자 활동 로그) ✨ **NEW**
+### 8. **user_activities** 테이블 (사용자 활동)
 
 | 컬럼명 | 데이터 타입 | NULL 허용 | 기본값 | 설명 |
 |--------|-------------|-----------|--------|------|
-| `id` | uuid | NO | gen_random_uuid() | ID (Primary Key) |
-| `user_id` | uuid | NO | null | 사용자 ID (profiles.id 참조) |
-| `activity_type` | varchar(50) | NO | null | 활동 타입 (login/purchase/coupon_use) |
-| `description` | text | YES | null | 활동 설명 |
-| `metadata` | jsonb | YES | '{}' | 추가 정보 (JSON) |
+| `id` | uuid | NO | gen_random_uuid() | 활동 ID (Primary Key) |
+| `user_id` | uuid | NO | null | 사용자 ID (**users.id 참조**) ✨ |
+| `activity_type` | varchar(50) | NO | null | 활동 유형 (login/purchase/ticket_use/coupon_use) |
+| `activity_data` | jsonb | YES | '{}' | 활동 상세 데이터 (JSON) |
 | `ip_address` | inet | YES | null | IP 주소 |
 | `user_agent` | text | YES | null | 사용자 에이전트 |
-| `created_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 생성일 |
+| `created_at` | timestamp with time zone | YES | CURRENT_TIMESTAMP | 활동 시간 |
 
 ---
 
-## 🔗 테이블 관계
+## 🔗 테이블 관계도
 
 ```
-📱 사용자 시스템
-auth.users (1) ────── (1) profiles
-     │
-     └─ 사용자 인증 ──── 프로필 정보
+users (1) -----> (N) orders
+users (1) -----> (N) user_coupons  
+users (1) -----> (N) user_activities
+users (1) -----> (N) coupons (created_by)
 
-👤 사용자 - 주문 관계
-profiles (1) ────── (N) orders
-    │                    │
-    └─ user_id ───────── user_id
+orders (1) -----> (N) order_items
+orders (1) <----- (N) user_coupons (used_in)
 
-🎫 주문 - 티켓 관계  
-orders (1) ────── (N) order_items
-   │                    │
-   └─ id ──────────── order_id
+coupons (1) -----> (N) user_coupons
 
-🔍 티켓 - 스캔 관계
-order_items ──── scan_logs
-   │                │
-   └─ 티켓 정보 ──── 스캔 기록
-
-🎟️ 쿠폰 시스템
-coupons (1) ────── (N) user_coupons ────── (1) profiles
-    │                      │                    │
-    └─ 쿠폰 마스터 ──── 사용자별 쿠폰 ──── 사용자
-
-orders ────── coupons
-   │              │
-   └─ coupon_id ─┘
-
-📝 활동 로그
-profiles (1) ────── (N) user_activities
-    │                    │
-    └─ user_id ───────── user_id
-
-📢 공지사항 (독립적)
-notices
-   └─ 공지사항 관리
+order_items (1) -----> (N) scan_logs
 ```
 
 ---
 
-## 📊 인덱스 정보
+## ⚙️ 권한 설정 (개발 환경)
 
-### **orders** 테이블
-- `idx_orders_customer_phone` : customer_phone
-- `idx_orders_status` : status
-- `idx_orders_created_at` : created_at
+현재 개발 환경에서는 **단순한 권한 설정**을 사용합니다:
 
-### **order_items** 테이블  
-- `idx_order_items_order_id` : order_id
-- `idx_order_items_ticket_type` : ticket_type
+```sql
+-- ✅ RLS 비활성화 (모든 테이블)
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
+ALTER TABLE orders DISABLE ROW LEVEL SECURITY;
+-- ... 기타 테이블들
 
-### **scan_logs** 테이블
-- `idx_scan_logs_order_id` : order_id
-- `idx_scan_logs_customer_phone` : customer_phone
-- `idx_scan_logs_scanned_at` : scanned_at
+-- ✅ 기본 권한 부여
+GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO anon;
+```
 
-### **notices** 테이블 ✨ **NEW**
-- `idx_notices_status` : status
-- `idx_notices_category` : category  
-- `idx_notices_is_important` : is_important
-- `idx_notices_created_at` : created_at DESC
-- `idx_notices_images` : images (GIN 인덱스)
+## 📊 주요 변경 사항 요약
 
-### **profiles** 테이블 ✨ **NEW**
-- `idx_profiles_email` : email
-- `idx_profiles_role` : role
-- `idx_profiles_created_at` : created_at DESC
+| 이전 (profiles) | 현재 (users) | 변경 이유 |
+|----------------|-------------|-----------|
+| 복잡한 RLS 정책 4개 | RLS 비활성화 | 개발 환경 단순화 |
+| 자동 트리거 생성 | Auth Context 직접 관리 | 제어권 향상 |
+| 9개 필드 (avatar_url, birth_date 등) | 6개 핵심 필드만 | 불필요한 복잡성 제거 |
+| 복잡한 에러 처리 | 단순한 CRUD | 개발 속도 향상 |
 
-### **coupons** 테이블 ✨ **NEW**
-- `idx_coupons_code` : code (UNIQUE)
-- `idx_coupons_status` : status
-- `idx_coupons_valid_until` : valid_until
-- `idx_coupons_type` : type
+## 🎯 데이터 흐름
 
-### **user_coupons** 테이블 ✨ **NEW**
-- `idx_user_coupons_user_id` : user_id
-- `idx_user_coupons_coupon_id` : coupon_id
-- `idx_user_coupons_status` : status
-- `idx_user_coupons_expires_at` : expires_at
+1. **회원가입**: Supabase Auth → Auth Context에서 users 테이블 직접 생성
+2. **로그인**: Supabase Auth → Auth Context에서 users 데이터 조회/자동 생성
+3. **주문**: users → orders → order_items
+4. **쿠폰**: users → user_coupons → orders (사용)
+5. **티켓 스캔**: order_items → scan_logs
+6. **활동 기록**: 모든 활동 → user_activities
 
-### **user_activities** 테이블 ✨ **NEW**
-- `idx_user_activities_user_id` : user_id
-- `idx_user_activities_type` : activity_type
-- `idx_user_activities_created_at` : created_at DESC
-- `idx_user_activities_metadata` : metadata (GIN 인덱스)
+## 🚀 다음 단계
 
----
-
-## 🚀 주요 기능
-
-### 🎫 **티켓팅 시스템**
-- 주문 생성 → 결제 → 티켓 발급 → QR 스캔 → 입장
-
-### 💳 **결제 시스템** 
-- 빌게이트 PG 연동
-- 실시간 결제 승인/취소
-- 부분 취소 지원
-
-### 📱 **QR 스캔 시스템**
-- 개별 티켓 단위 스캔 관리
-- 실시간 스캔 로그 기록
-- 중복 사용 방지
-
-### 📢 **공지사항 시스템** ✨ **NEW**
-- 이미지 첨부 지원 (Supabase Storage)
-- 중요 공지 팝업 기능
-- 카테고리별 분류
-- 조회수 추적
-
-### 👤 **사용자 시스템** ✨ **NEW**
-- Supabase Auth + Google OAuth 로그인
-- 사용자 프로필 관리
-- 역할 기반 권한 제어 (user/admin/manager)
-- 마이페이지 (티켓 내역, 쿠폰 관리)
-
-### 🎟️ **쿠폰 시스템** ✨ **NEW**
-- 할인 쿠폰 (정율/정액 할인)
-- 무료 이용권 쿠폰
-- 사용자별 쿠폰 관리
-- 쿠폰 유효기간 및 사용 한도 관리
-
-### 📊 **사용자 활동 추적** ✨ **NEW**
-- 로그인/구매/쿠폰 사용 기록
-- IP 주소 및 사용자 에이전트 로그
-- JSON 메타데이터 저장
-- 관리자 통계 및 분석
-
----
-
-## 🔧 최근 업데이트
-
-### 2024.12.29 - 사용자 시스템 구현 ✨ **NEW**
-- ✅ **profiles** 테이블 생성 (사용자 프로필)
-- ✅ **coupons** 테이블 생성 (쿠폰 마스터)
-- ✅ **user_coupons** 테이블 생성 (사용자별 쿠폰)
-- ✅ **user_activities** 테이블 생성 (활동 로그)
-- ✅ **orders** 테이블 확장 (사용자 연결, 쿠폰 할인)
-- ✅ **order_items** 테이블 확장 (QR 코드 정보)
-
-### 2024.12 - 공지사항 시스템 추가
-- ✅ **notices** 테이블 생성
-- ✅ 이미지 업로드 기능 (Supabase Storage)
-- ✅ 중요 공지 팝업 시스템
-- ✅ 관리자 공지사항 관리 페이지
-- ✅ 사용자 공지사항 조회 페이지
-
-### 이전 업데이트
-- ✅ 빌게이트 결제 시스템 연동
-- ✅ QR 스캔 시스템 구축
-- ✅ 관리자 대시보드 완성
+1. **테스트**: `/debug/profiles-test` 페이지에서 users 테이블 동작 확인
+2. **Auth 테스트**: `/debug/auth-test` 페이지에서 인증 흐름 확인  
+3. **운영 준비**: 필요 시 RLS 정책 추가 (운영 환경용)
+4. **성능 최적화**: 사용량에 따른 인덱스 추가 조정

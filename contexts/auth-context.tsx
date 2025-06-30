@@ -1,18 +1,16 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from 'react'
+import { User } from '@supabase/supabase-js'
 import { createSupabaseClient } from '@/lib/supabase'
-import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
 
-interface Profile {
+// User 타입 정의 (users 테이블 구조에 맞게)
+interface UserData {
   id: string
   email: string
   name: string
   phone?: string
-  birth_date?: string
-  gender?: string
-  role: 'user' | 'admin' | 'manager'
-  avatar_url?: string
+  role: 'admin' | 'manager' | 'user'
   marketing_agreed: boolean
   created_at: string
   updated_at: string
@@ -20,218 +18,218 @@ interface Profile {
 
 interface AuthContextType {
   user: User | null
-  profile: Profile | null
+  userData: UserData | null
   loading: boolean
-  signInWithGoogle: () => Promise<void>
   signInWithEmail: (email: string, password: string) => Promise<void>
-  signUpWithEmail: (email: string, password: string, name: string) => Promise<void>
+  signUpWithEmail: (email: string, password: string, name: string, phone?: string, marketingAgreed?: boolean) => Promise<void>
   signOut: () => Promise<void>
-  updateProfile: (updates: Partial<Profile>) => Promise<void>
+  updateUserData: (updates: Partial<UserData>) => Promise<void>
+  refreshUserData: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const [userData, setUserData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
   const supabase = createSupabaseClient()
 
-  useEffect(() => {
-    // 초기 사용자 상태 확인
-    const getInitialUser = async () => {
-      console.log('🚀 AuthProvider 초기화 시작')
-      
-      const { data: { user } } = await supabase.auth.getUser()
-      console.log('👤 현재 사용자:', user)
-      
-      setUser(user)
-      
-      if (user) {
-        console.log('📞 프로필 조회 호출:', user.id)
-        await fetchProfile(user.id)
-      } else {
-        console.log('❌ 로그인된 사용자 없음')
-      }
-      
-      setLoading(false)
-    }
-
-    getInitialUser()
-
-    // 인증 상태 변경 감지
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => {
-        setUser(session?.user ?? null)
-        
-        if (session?.user) {
-          await fetchProfile(session.user.id)
-        } else {
-          setProfile(null)
-        }
-        
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  const fetchProfile = async (userId: string) => {
+  // users 테이블에서 사용자 데이터 조회
+  const fetchUserData = async (userId: string): Promise<UserData | null> => {
     try {
-      console.log('🔍 프로필 조회 시작:', userId)
+      console.log('사용자 데이터 조회 시작:', userId)
       
       const { data, error } = await supabase
-        .from('profiles')
+        .from('users')
         .select('*')
         .eq('id', userId)
         .single()
 
-      console.log('📊 Supabase 응답:', { data, error })
-
       if (error) {
-        console.error('❌ 프로필 조회 실패 (Supabase 오류):', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        })
-        
-        // 프로필이 존재하지 않는 경우 (새 사용자)
-        if (error.code === 'PGRST116') {
-          console.log('🆕 새 사용자 감지 - 프로필 생성 필요')
-          await createProfile(userId)
-          return
-        }
-        
-        return
+        console.error('사용자 데이터 조회 실패:', error)
+        return null
       }
 
-      console.log('✅ 프로필 조회 성공:', data)
-      setProfile(data)
+      console.log('사용자 데이터 조회 성공:', data)
+      return data as UserData
     } catch (error) {
-      console.error('❌ 프로필 조회 실패 (일반 오류):', error)
+      console.error('사용자 데이터 조회 오류:', error)
+      return null
     }
   }
 
-  const createProfile = async (userId: string) => {
+  // users 테이블에 직접 사용자 생성
+  const createUserData = async (user: User, name?: string): Promise<UserData | null> => {
     try {
-      console.log('🔨 새 프로필 생성 시작:', userId)
+      console.log('사용자 데이터 생성 시작:', user.id, user.email)
       
-      const { data: userData } = await supabase.auth.getUser()
-      const user = userData?.user
-      
-      if (!user) return
-
-      const newProfile = {
-        id: userId,
-        email: user.email || '',
-        name: user.user_metadata?.name || user.email?.split('@')[0] || '사용자',
+      const newUserData = {
+        id: user.id,
+        email: user.email!,
+        name: name || user.user_metadata?.name || user.email!.split('@')[0],
+        phone: user.user_metadata?.phone || null,
         role: 'user' as const,
         marketing_agreed: false
       }
 
       const { data, error } = await supabase
-        .from('profiles')
-        .insert([newProfile])
+        .from('users')
+        .insert([newUserData])
         .select()
         .single()
 
       if (error) {
-        console.error('❌ 프로필 생성 실패:', error)
-        return
+        console.error('사용자 데이터 생성 실패:', error)
+        return null
       }
 
-      console.log('✅ 프로필 생성 성공:', data)
-      setProfile(data)
+      console.log('사용자 데이터 생성 성공:', data)
+      return data as UserData
     } catch (error) {
-      console.error('❌ 프로필 생성 중 오류:', error)
+      console.error('사용자 데이터 생성 오류:', error)
+      return null
     }
   }
 
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
-      }
-    })
-    
-    if (error) {
+  // 사용자 데이터 업데이트
+  const updateUserData = async (updates: Partial<UserData>) => {
+    if (!user) return
+
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', user.id)
+        .select()
+        .single()
+
+      if (error) throw error
+      
+      setUserData(data as UserData)
+    } catch (error) {
+      console.error('사용자 데이터 업데이트 실패:', error)
       throw error
     }
   }
 
+  // 사용자 데이터 새로고침
+  const refreshUserData = async () => {
+    if (!user) return
+    
+    const data = await fetchUserData(user.id)
+    setUserData(data)
+  }
+
+
+
+  // 이메일 로그인
   const signInWithEmail = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password
     })
     
-    if (error) {
-      throw error
-    }
+    if (error) throw error
   }
 
-  const signUpWithEmail = async (email: string, password: string, name: string) => {
-    const { error } = await supabase.auth.signUp({
+  // 이메일 회원가입 (users 테이블에 직접 생성)
+  const signUpWithEmail = async (email: string, password: string, name: string, phone?: string, marketingAgreed: boolean = false) => {
+    // 1. Supabase Auth에 회원가입
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          name: name
+          name: name,
+          phone: phone
         }
       }
     })
     
-    if (error) {
-      throw error
+    if (error) throw error
+    
+    // 2. 회원가입 성공 시 users 테이블에 직접 데이터 생성
+    if (data.user) {
+      try {
+        console.log('회원가입 후 users 테이블에 데이터 생성 시작:', data.user.id)
+        
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert([{
+            id: data.user.id,
+            email: data.user.email!,
+            name: name,
+            phone: phone || null,
+            role: 'user',
+            marketing_agreed: marketingAgreed
+          }])
+        
+        if (insertError) {
+          console.error('Users 테이블 저장 실패:', insertError)
+          throw insertError
+        } else {
+          console.log('Users 테이블 저장 성공')
+        }
+      } catch (insertError) {
+        console.error('Users 테이블 저장 오류:', insertError)
+        throw insertError
+      }
     }
   }
 
+  // 로그아웃
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
-    
-    if (error) {
-      throw error
-    }
+    if (error) throw error
   }
 
-  const updateProfile = async (updates: Partial<Profile>) => {
-    if (!user) return
+  // 인증 상태 변경 감지
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth 상태 변경:', event, session?.user?.id)
+      
+      if (session?.user) {
+        setUser(session.user)
+        
+        // users 테이블에서 데이터 조회
+        let userData = await fetchUserData(session.user.id)
+        
+        // 데이터가 없으면 생성 (로그인 시 자동 생성)
+        if (!userData) {
+          console.log('사용자 데이터가 없어서 생성합니다')
+          userData = await createUserData(session.user)
+        }
+        
+        setUserData(userData)
+      } else {
+        setUser(null)
+        setUserData(null)
+      }
+      
+      setLoading(false)
+    })
 
-    const { error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
+    return () => subscription.unsubscribe()
+  }, [])
 
-    if (error) {
-      throw error
-    }
-
-    // 로컬 상태 업데이트
-    setProfile(prev => prev ? { ...prev, ...updates } : null)
-  }
-
-  const value: AuthContextType = {
+  const value = {
     user,
-    profile,
+    userData,
     loading,
-    signInWithGoogle,
     signInWithEmail,
     signUpWithEmail,
     signOut,
-    updateProfile
+    updateUserData,
+    refreshUserData
   }
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext)
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')

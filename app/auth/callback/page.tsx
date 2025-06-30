@@ -13,7 +13,8 @@ export default function AuthCallbackPage() {
       const supabase = createSupabaseClient()
       
       try {
-        const { error } = await supabase.auth.getSession()
+        // 이메일 확인 후 콜백 처리
+        const { data, error } = await supabase.auth.getSession()
         
         if (error) {
           console.error('Auth callback error:', error)
@@ -21,8 +22,13 @@ export default function AuthCallbackPage() {
           return
         }
 
-        // 성공적으로 로그인되었으면 홈으로 리다이렉트
-        router.push('/')
+        if (data.session) {
+          // 세션이 있으면 홈으로 리다이렉트
+          router.push('/')
+        } else {
+          // 세션이 없으면 로그인 페이지로
+          router.push('/auth/login')
+        }
       } catch (error) {
         console.error('Auth callback error:', error)
         router.push('/auth/login?error=callback_error')

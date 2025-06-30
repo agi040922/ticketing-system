@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/auth-context'
-import { Chrome, Mail, ArrowLeft, CheckCircle } from 'lucide-react'
+import { Mail, ArrowLeft } from 'lucide-react'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -18,25 +18,13 @@ export default function RegisterPage() {
     email: '',
     password: '',
     confirmPassword: '',
+    phone: '',
     marketingAgreed: false
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
-  const { signInWithGoogle, signUpWithEmail } = useAuth()
+  const { signUpWithEmail } = useAuth()
   const router = useRouter()
-
-  const handleGoogleSignup = async () => {
-    try {
-      setLoading(true)
-      setError('')
-      await signInWithGoogle()
-    } catch (error: any) {
-      setError(error.message || '구글 회원가입에 실패했습니다.')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleEmailSignup = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,8 +47,16 @@ export default function RegisterPage() {
     try {
       setLoading(true)
       setError('')
-      await signUpWithEmail(formData.email, formData.password, formData.name)
-      setSuccess(true)
+      await signUpWithEmail(
+        formData.email, 
+        formData.password, 
+        formData.name, 
+        formData.phone || undefined,
+        formData.marketingAgreed
+      )
+      
+      // 회원가입 성공 시 이메일 인증 페이지로 리다이렉트
+      router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`)
     } catch (error: any) {
       setError(error.message || '회원가입에 실패했습니다.')
     } finally {
@@ -72,31 +68,7 @@ export default function RegisterPage() {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <Card>
-            <CardContent className="text-center py-8 space-y-4">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
-              <h2 className="text-2xl font-bold text-gray-900">회원가입 완료!</h2>
-              <p className="text-gray-600">
-                이메일을 확인하여 계정을 활성화해주세요.
-              </p>
-              <div className="space-y-2">
-                <Button asChild className="w-full">
-                  <Link href="/auth/login">로그인하기</Link>
-                </Button>
-                <Button variant="ghost" asChild className="w-full">
-                  <Link href="/">홈으로 가기</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
+
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -128,27 +100,7 @@ export default function RegisterPage() {
               </Alert>
             )}
 
-            {/* 구글 회원가입 */}
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={handleGoogleSignup}
-              disabled={loading}
-            >
-              <Chrome className="h-5 w-5 mr-2" />
-              Google로 계속하기
-            </Button>
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">또는</span>
-              </div>
-            </div>
 
             {/* 이메일 회원가입 */}
             <form onSubmit={handleEmailSignup} className="space-y-4">
@@ -197,6 +149,17 @@ export default function RegisterPage() {
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                   required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="phone">전화번호 (선택)</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="010-1234-5678"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
                 />
               </div>
 
